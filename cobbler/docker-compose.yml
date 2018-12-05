@@ -1,0 +1,6 @@
+cobbler:
+  image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/docker-cobbler:2.8.3
+  volumes:
+    - /mnt:/mnt:ro
+  env_file: cobbler.env
+  net: "host"
