@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mycat
+  labels:
+    name: mycat
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: mycat
+    spec:
+      containers:
+      - name: mycat
+        image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/mycat:0.1
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MYSQL_USER
+            value: 'root'
+          - name: MYSQL_PASSWORD
+            value: ''
+          - name: DB_NAME
+            value: 'demo'
+          - name: LOG_LEVEL
+            value: 'debug'
+          - name: MYSQL_MASTER_SERVICE_HOST
+            value: 'mysql-0.mysql.middleware'
+          - name: MYSQL_SLAVE_SERVICE_HOST
+            value: 'mysql-read.middleware'
+        ports:
+        - containerPort: 8066
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mycat
+spec:
+  ports:
+  - name: client 
+    port: 8066
+    protocol: TCP
+  - name: admin
+    port: 9066
+    protocol: TCP
+  selector:
+    name: mycat
+  type:
+     NodePort
