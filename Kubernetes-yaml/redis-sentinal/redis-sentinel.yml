@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sentinel
+  namespace: redis-ns
+  labels:
+    name: redis-sentinel
+spec:
+  ports:
+    - port: 26379
+      targetPort: 26379
+  selector:
+    redis-sentinel: "true"
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: redis-sentinel
+  namespace: redis-ns
+spec:
+  serviceName: redis-sentinel
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        redis-sentinel: "true"
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  name: redis-sentinel
+              topologyKey: "kubernetes.io/hostname"
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: redis-sentinel
+        image: 10.100.10.130/daocloud/redis:v3.2.11
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 26379
+          name: redis-sentinal
+        env:
+        - name: SENTINEL
+          value: "true"
+        - name: REDIS_PASS
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redisAuthPass

@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave
+  namespace: redis-ns
+  labels:
+    name: redis-slave
+spec:
+  ports:
+    - port: 6379
+  clusterIP: None
+  selector:
+    name: redis-slave
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: redis-slave
+  namespace: redis-ns
+  labels:
+    name: redis-slave
+spec:
+  serviceName: redis-slave
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        name: redis-slave
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: redis
+        image: 10.100.10.130/daocloud/redis:v3.2.11
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6379
+        env:
+        - name: REDIS_PASS
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redisAuthPass
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: redis-slave-volume
+          mountPath: /redis-slave-data
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-slave-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

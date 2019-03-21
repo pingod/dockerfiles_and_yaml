@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>releases</id>     <!-- 要与pom.xml的发布仓库中的id对应 -->
+      <username>admin</username>
+      <password>123456</password>
+    </server>
+    <server>
+        <id>snapshots</id>  <!-- 要与pom.xml的发布仓库中的id对应 -->
+        <username>admin</username>
+        <password>admin123</password>
+    </server>
+  </servers>
+
+  <mirrors>
+    <mirror>
+        <id>nexus-aliyun</id>
+        <mirrorOf>central</mirrorOf>
+        <name>Nexus aliyun</name>
+        <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+    </mirror> 
+</mirrors>
+    
+</settings>
