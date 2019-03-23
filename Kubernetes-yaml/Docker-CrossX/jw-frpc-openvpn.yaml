@@ -1,0 +1,89 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: openvpn
+  namespace: middleware
+  labels:
+    app: openvpn
+spec:
+  template:
+    metadata:
+      labels:
+        app: openvpn
+    spec:
+      containers:
+      - image: jianwenz/openvpn
+        name: openvpn
+        securityContext: 
+          privileged: true
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1024Mi"
+          requests:
+            cpu: "0"
+            memory: "0"
+        ports:
+        - containerPort: 1194
+        volumeMounts:
+        - mountPath: /etc/openvpn
+          name: data
+      volumes:
+      - name: data
+        hostPath:
+          path: /data/tools/openvpn
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openvpn
+spec:
+  ports:
+  - port: 1194
+  selector:
+    app: openvpn
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: frpc
+  namespace: middleware
+  labels:
+    app: frpc
+spec:
+  template:
+    metadata:
+      labels:
+        app: frpc
+    spec:
+      containers:
+      - image: jianwenz/frpc:0.21
+        name: frpc
+        securityContext: 
+          privileged: true
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1024Mi"
+          requests:
+            cpu: "0"
+            memory: "0"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /opt/conf
+          name: data-frpc
+      volumes:
+      - name: data-frpc
+        hostPath:
+          path: /data/tools/frpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frpc
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: frpc
