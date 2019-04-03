@@ -1,0 +1,3 @@
+[submodule "nginx/verynginx"]
+	path = nginx/verynginx
+	url = git@github.com:pingod/VeryNginx.git
