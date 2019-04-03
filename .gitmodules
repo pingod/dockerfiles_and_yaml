@@ -1,3 +1,6 @@
 [submodule "nginx/verynginx"]
 	path = nginx/verynginx
 	url = git@github.com:pingod/VeryNginx.git
+[submodule "nginx/openrestry"]
+	path = nginx/openrestry
+	url = git@github.com:pingod/docker-openresty.git
