@@ -21,6 +21,7 @@ RUN apk add --no-cache \
 ENV WIREGUARD_VERSION 0.0.20181119
 
 RUN set -x \
+    && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
 	&& apk add --no-cache --virtual .build-deps \
 		git \
 	&& git clone --depth 1 --branch "${WIREGUARD_VERSION}" https://git.zx2c4.com/WireGuard.git /wireguard \
