@@ -25,6 +25,8 @@
 1. 首先更改`cobbler.env`变量文件里的变量信息  
 2. 把系统镜像挂载到本机的`/mnt`目录下  
 3. 运行cobbler容器：`docker-compose up -d`  
+   如果你不想通过docker-compose 来启动，则可以通过下面命令
+   docker run --name=cobbler -d --restart=always --network=host --env-file=./cobbler.env -v /mnt:/mnt:ro registry.cn-hangzhou.aliyuncs.com/sourcegarden/docker-cobbler:2.8.3
 4. 进入cobbler容器，配置装机系统：`docker exec -it docker-cobbler_cobbler_1 bash`
 5. 由于上面已经将镜像挂载到容器的/mnt下,那么下面将导入到cobbler中: 
   ` cobbler import --path=/mnt/ --name=CentOS-7-x86_64 --arch=x86_64 `
