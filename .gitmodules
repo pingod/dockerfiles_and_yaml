@@ -4,3 +4,6 @@
 [submodule "nginx/openrestry"]
 	path = nginx/openrestry
 	url = git@github.com:pingod/docker-openresty.git
+[submodule "nsenter"]
+	path = nsenter
+	url = git@github.com:pingod/nsenter.git
