@@ -1,9 +1,21 @@
-FROM golang:1.8.5-alpine as builder
-ARG GOPROXY_VERSION=master
-RUN apk update && apk upgrade && \
-    apk add --no-cache git && cd /go/src/ && git clone https://github.com/snail007/goproxy && \
-	cd goproxy && git checkout ${GOPROXY_VERSION} && \
-    go get && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o proxy
-FROM alpine:3.7
-COPY --from=builder /go/src/goproxy/proxy /
-CMD /proxy ${OPTS}
+FROM alpine:3.9
+ENV FILEURL=https://github.com/snail007/goproxy/releases/download/v8.3/proxy-linux-amd64.tar.gz
+WORKDIR /goproxy
+RUN apk update && \
+    apk add --no-cache curl wget && \
+    wget $FILEURL -O goproxy.tar.gz
+RUN tar xvf goproxy.tar.gz && rm -fr goproxy.tar.gz
+COPY run.sh ./run.sh
+RUN chmod +x ./run.sh
+
+# web-ui(included goproxy)
+#RUN F="proxy-admin_linux-amd64.tar.gz" && \
+#  LAST_VERSION=1.5 && \
+#  rm -rf $F && \
+#  wget "https://github.com/snail007/proxy_admin_free/releases/download/v${LAST_VERSION}/$F" && \
+#  tar zxvf $F && \
+#  chmod +x ./proxy-admin && \
+#  rm $F && \
+#  echo "install done, please visit : http://YOUR_IP:32080/"
+
+CMD /goproxy/run.sh
