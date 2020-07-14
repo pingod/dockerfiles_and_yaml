@@ -1,0 +1,65 @@
+version: "3"
+services:
+  postal:
+    #image: catdeployed/postal:alpine
+    build: .
+    container_name: postal
+    command: run
+    ports:
+      - 127.0.0.1:25:25
+    depends_on:
+      - "mysql"
+      - "rabbitmq"
+    volumes:
+      - persistent_assets:/storage
+      - static_assets:/opt/postal/public
+      - postal_assets:/opt/postal/public/assets
+      - ./src/templates/:/templates
+    environment:
+      - MYSQL_ROOT_PASSWORD=changeme
+      - MYSQL_DATABASE=postal
+      - RABBITMQ_DEFAULT_USER=postal
+      - RABBITMQ_DEFAULT_PASS=changeme
+      - RABBITMQ_DEFAULT_VHOST=postal
+      - POSTAL_FNAME=Sia
+      - POSTAL_LNAME=Cat
+      - POSTAL_PASSWORD=SecretCatPassword
+      - POSTAL_EMAIL=myemail@catsworld.com
+    healthcheck:
+      test: curl -sS http://127.0.0.1:5000 || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 3
+  mysql:
+    image: mariadb:10
+    container_name: postal_mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=changeme
+      - MYSQL_DATABASE=postal
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: postal_rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=postal
+      - RABBITMQ_DEFAULT_PASS=changeme
+      - RABBITMQ_DEFAULT_VHOST=/postal
+  nginx:
+    image: nginx
+    container_name: postal_nginx
+    ports:
+      - 80:80
+    links:
+      - postal
+    depends_on:
+      - postal
+    volumes:
+      - ./src/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_assets:/opt/postal/public:ro
+      - postal_assets:/opt/postal/public/assets:ro
+volumes:
+  static_assets:
+  postal_assets:
+  mysql_data:
+  persistent_assets:
