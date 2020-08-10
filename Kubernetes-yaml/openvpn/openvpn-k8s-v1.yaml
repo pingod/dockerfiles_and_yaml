@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: openvpn
+  name: openvpn
+spec:
+  type: NodePort
+  ports:
+  - name: "1194"
+    port: 1194
+    targetPort: 1194
+  selector:
+    io.kompose.service: openvpn
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: openvpn
+  name: openvpn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: openvpn
+  template:
+    metadata:
+      labels:
+        io.kompose.service: openvpn
+    spec:
+      containers:
+      - image: kylemanna/openvpn
+        name: openvpn
+        ports:
+        - containerPort: 1194
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        volumeMounts:
+        - mountPath: /etc/openvpn
+          name: openvpn-claim0
+      restartPolicy: Always
+      volumes:
+      - name: openvpn-claim0
+        persistentVolumeClaim:
+          claimName: openvpn-claim0
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openvpn-claim0
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs0
+  resources:
+    requests:
+      storage: 10Mi
