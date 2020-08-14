@@ -188,8 +188,6 @@ bash-5.0#
 
 
 
-### 更多帮助请参考
-
 [ntop]: https://github.com/ntop "ntop团队"
 [客户端下载]: https://github.com/lucktu/n2n "客户端下载"
 [组网示意]: https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png "组网示意"
