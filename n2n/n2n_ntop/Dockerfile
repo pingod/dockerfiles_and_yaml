@@ -42,12 +42,12 @@ RUN  chmod a+x /usr/local/sbin/run.sh \
 	&& touch /var/log/n2n.log \
 	&& touch /var/log/run.log 
 
-ENV MODE DHCP
+ENV MODE DHCPD
 ENV SUPERNODE_PORT 10086
 ENV N2N_INTERFACE edge0
 ENV STATIC_IP 10.0.10.10
-ENV N2N_GROUP zctmdc_proxy
-ENV N2N_PASS zctmdc_proxy
-ENV N2N_SERVER n2n.lucktu.com:10086
+ENV N2N_GROUP funny_proxy
+ENV N2N_PASS funny_proxy
+ENV N2N_SERVER www.funny.com:10086
 ENV N2N_ARGS -Av
 CMD [ "/bin/bash" , "-c" , "/usr/local/sbin/run.sh" ]

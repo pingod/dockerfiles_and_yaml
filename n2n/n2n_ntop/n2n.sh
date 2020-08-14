@@ -19,7 +19,7 @@ mode_supernode() {
 }
 init_dhcpd_conf()
 {
-IP_PREFIX=`echo $N2N_IP | grep -Eo "([0-9]{1,3}[\.]){3}"`
+IP_PREFIX=`echo $STATIC_IP | grep -Eo "([0-9]{1,3}[\.]){3}"`
 if [ ! -f "/etc/dhcp/dhcpd.conf" ] ;then
 mkdir -p /etc/dhcp/
 cat > "/etc/dhcp/dhcpd.conf" <<    EOF
@@ -27,7 +27,7 @@ cat > "/etc/dhcp/dhcpd.conf" <<    EOF
   ddns-update-style none;
   ignore client-updates;
   subnet ${IP_PREFIX}0 netmask 255.255.255.0 {
-    range ${IP_PREFIX}60 ${IP_PREFIX}180;
+    range ${IP_PREFIX}10 ${IP_PREFIX}240;
     default-lease-time 600;
     max-lease-time 7200;
   }

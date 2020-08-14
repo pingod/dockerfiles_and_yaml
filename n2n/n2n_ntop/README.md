@@ -2,13 +2,11 @@
 
 ## 关于
 
-[n2n][n2n] 是一个 **第二层对等 VPN**，可轻松创建绕过中间防火墙的虚拟网络。
+[n2n][n2n] 是一个[ntop 团队][ntop] 推出的 **第二层对等 VPN**，可轻松创建绕过中间防火墙的虚拟网络。
 
-通过 [ntop 团队][ntop] 编译的n2n,直连成功率高(仅局域网内不及), 且速度更快.
+N2N 是通过UDP方式建立链接，如果某个网络禁用了 UDP，那么该网络下的设备就不适合使用本软件来加入这个虚拟局域网
 
-N2N 是通过UDP方式建立链接，如果某个网络禁用了 UDP，那么该网络下的设备就不适合使用本软件来加入这个虚拟局域网（用"blue's port scanner"，选择UDP来扫描，扫出来的就是未被封的，正常情况下应该超级多）
-
-为了开始使用N2N，需要两个元素：
+N2N节点分为下面两种角色：
 
 1. *supernode* ：
 它允许edge节点链接和发现其他edge的超级节点。
@@ -19,7 +17,7 @@ N2N 是通过UDP方式建立链接，如果某个网络禁用了 UDP，那么该
 
 单个supernode节点可以中继多个edge，而单个电脑可以同时连接多个supernode。
 边缘节点可以使用加密密钥对社区中的数据包进行加密。
-n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常是由于特殊的NAT设备），则超级节点也用于中继数据包。
+n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常是由于特殊的NAT设备），则超级节点将用于中继数据包。
 
 ### 组网示意
 
@@ -29,7 +27,7 @@ n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常
 
 ![连接原理][连接原理]
 
-## 快速入门
+## 快速上手
 
 ### 代码换行
 
@@ -39,25 +37,13 @@ n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常
 |powershell|**`**|键盘TAB按钮上方|
 |CMD|**＾**|键盘SHIFT+6|
 
-### 自写运行代码
+### 自定义容器启动命令
 
 ```bash
-docker run --rm -ti -p 10086:10086 zctmdc/n2n_ntop supernode -l 10086 -v
+docker run --rm -ti -p 10086:10086 registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n supernode -l 10086 -v
 ```
 
-### 建立 *supernode*
-
-* 前台模式
-
-```bash
-docker run \
-  --rm -ti \
-  -e MODE="SUPERNODE" \
-  -p 10086:10086/udp \
-  zctmdc/n2n_ntop
-```
-
-* 后台模式
+### 创建 *supernode* 
 
 ```bash
 docker run \
@@ -66,22 +52,11 @@ docker run \
   -e MODE="SUPERNODE" \
   -e SUPERNODE_PORT=10086 \
   -p 10086:10086/udp \
-  -e N2N_ARGS="-v"
-  zctmdc/n2n_ntop
+  -e N2N_ARGS="-v" \
+  registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n
 ```
 
-### 建立 *edge*
-
-* 前台模式
-
-```bash
-docker run \
-  --rm -ti \
-  --privileged \
-  zctmdc/n2n_ntop
-```
-
-* 后台模式
+### 创建 *edge*
 
 ```bash
 docker run \
@@ -94,109 +69,131 @@ docker run \
   -e N2N_GROUP="zctmdc_proxy" \
   -e N2N_PASS="zctmdc_proxy" \
   -e N2N_SERVER="n2n.lucktu.com:10086" \
-  -e N2N_ARGS="-Av" \
-  zctmdc/n2n_ntop
+  -e N2N_ARGS="-A -v" \
+  registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n
 ```
 
-## 更多模式
 
-### SUPERNODE - 超级节点
-
-```bash
-docker run \
-  -d --restart=always \
-  --name=supernode \
-  -e MODE="SUPERNODE" \
-  -e SUPERNODE_PORT=10086 \
-  -p 10086:10086/udp \
-  zctmdc/n2n_ntop
-```
-
-### DHCPD - DHCP服务模式
-
-```bash
-docker run \
-  -d --restart=always \
-  --name n2n_edge_dhcpd \
-  --privileged \
-  -e MODE="DHCPD" \
-  --net=host \
-  -e STATIC_IP="10.0.10.1" \
-  -v path/to/dhcpd.conf:/etc/dhcp/dhcpd.conf:ro \
-  -e N2N_GROUP="zctmdc_proxy" \
-  -e N2N_PASS="zctmdc_proxy" \
-  -e N2N_SERVER="n2n.lucktu.com:10086" \
-  zctmdc/n2n_ntop
-```
-
-指定STATIC_IP和-v dhcpd.conf:/etc/dhcp/dhcpd.conf:ro 文件
-
-### DHCP - DHCP客户端模式
-
-```bash
-docker run \
-  -d --restart=always \
-  --name n2n_edge_dhcp \
-  --privileged \
-  --net=host \
-  -e MODE="DHCP" \
-  -e N2N_GROUP="zctmdc_proxy" \
-  -e N2N_PASS="zctmdc_proxy" \
-  -e N2N_SERVER="n2n.lucktu.com:10086" \
-  zctmdc/n2n_ntop
-```
-
-### STATIC - 静态模式
-
-```bash
-docker run \
-  -d --restart=always \
-  --name n2n_edge_static \
-  --privileged \
-  --net=host \
-  -e MODE="STATIC" \
-  -e STATIC_IP="10.0.10.10" \
-  -e N2N_GROUP="zctmdc_proxy" \
-  -e N2N_PASS="zctmdc_proxy" \
-  -e N2N_SERVER="n2n.lucktu.com:10086" \
-  zctmdc/n2n_ntop
-```
 
 ## 环境变量介绍
 
-|变量名|变量说明|备注|对应参数|
-|---:|:---|:---|:---|
-|MODE|模式|对应启动的模式| *`SUPERNODE`* *`DHCP`* *`STATIC`* *`DHCPD`* |
-|SUPERNODE_PORT|超级节点端口|在SUPERNODE中使用|-l|
-|N2N_SERVER|要连接的N2N超级节点|IP:port|-l|
-|STATIC_IP|静态IP|在静态模式和DHCPD使用|-a|
-|N2N_GROUP|组网名称|在EDGE中使用|-c|
-|N2N_PASS|组网密码|在EDGE中使用|-k|
-|N2N_INTERFACE|网卡名|edge生成的网卡名字|-d|
-|N2N_ARGS|更多参数|运行时附加的更多参数|-Av|
+|变量名|变量说明|备注|对应参数|默认值|
+|---:|:---|:---|:---|----|
+|MODE|模式|对应启动的模式| *`SUPERNODE`* *`DHCP`* *`STATIC`* *`DHCPD`* |DHCPD|
+|SUPERNODE_PORT|超级节点端口|在SUPERNODE中使用|-l|10086|
+|N2N_SERVER|要连接的N2N超级节点|IP:port|-l|www.funny.com:10086|
+|STATIC_IP|静态IP|在静态模式和DHCPD使用|-a|10.0.10.10|
+|N2N_GROUP|组网名称|在EDGE中使用|-c|funny_proxy|
+|N2N_PASS|组网密码|在EDGE中使用|-k|funny_proxy|
+|N2N_INTERFACE|网卡名|edge生成的网卡名字|-d|edge0|
+|N2N_ARGS|更多参数|运行时附加的更多参数|-Av|-Av|
 
-## 还可以使用 *docker-compose* 配置运行
+
+
+### MODE模式说明
+
+SUPERNODE：  超级节点
+
+DHCPD: 开启DHCPD服务的edge节点，开启后若没有dhcp配置文件，启动脚本将自动生成（容器中的路径为/etc/dhcp/dhcpd.conf)
+
+DHCP: 开启DHCP客户端的edge节点
+
+STATIC: 指定IP的edge节点
+
+
+
+## 若要测试，可以使用 *docker-compose* 快速运行
 
 ```bash
-git clone https://github.com/zctmdc/docker.git
-cd n2n-ntop
 # docker-compose up -d
 docker-compose run n2n_edge_dhcp
 ```
 
-请访问:[github地址][github地址]查看更多
+
+
+## 命令行参数说明
+
+### supernode
+
+```
+bash-5.0# supernode -h
+Welcome to n2n v. for Linux-4.19.104-microsoft-standard
+Built on Aug 14 2020 07:20:17
+Copyright 2007-2020 - ntop.org and contributors
+
+supernode <config file> (see supernode.conf)
+or
+supernode -l <local port> -c <path> [-u <uid> -g <gid>] [-t <mgmt port>] [-d <net/bit>] [-v] 
+
+-l <port>     | Set UDP main listen port to <port>
+-c <path>     | File containing the allowed communities.
+-u <UID>      | User ID (numeric) to use when privileges are dropped.
+-g <GID>      | Group ID (numeric) to use when privileges are dropped.
+-t <port>     | Management UDP Port (for multiple supernodes on a machine).
+-d <net/bit>  | Subnet that provides dhcp service for edge. eg. -d 172.17.12.0/24
+-v            | Increase verbosity. Can be used multiple times.
+-h            | This help message.
+```
+
+
+
+### edge
+
+```
+bash-5.0# edge -h
+Welcome to n2n v. for Linux-4.19.104-microsoft-standard
+Built on Aug 14 2020 07:20:17
+Copyright 2007-2020 - ntop.org and contributors
+
+edge <config file> (see edge.conf)
+or
+edge -d <tun device> -a [static:|dhcp:]<tun IP address> -c <community> [-k <encrypt key>]
+    [-s <netmask>] [-u <uid> -g <gid>][-f][-T <tos>][-n cidr:gateway] [-m <MAC address>] -l <supernode host:port>
+    [-p <local port>] [-M <mtu>] [-D] [-r] [-E] [-v] [-i <reg_interval>] [-L <reg_ttl>] [-t <mgmt port>] [-A[<cipher>]] [-H] [-z[<compression algo>]] [-h]
+
+-d <tun device>          | tun device name
+-a <mode:address>        | Set interface address. For DHCP use '-r -a dhcp:0.0.0.0'
+-c <community>           | n2n community name the edge belongs to.
+-k <encrypt key>         | Encryption key (ASCII) - also N2N_KEY=<encrypt key>.
+-s <netmask>             | Edge interface netmask in dotted decimal notation (255.255.255.0).
+-l <supernode host:port> | Supernode IP:port
+-i <reg_interval>        | Registration interval, for NAT hole punching (default 20 seconds)
+-L <reg_ttl>             | TTL for registration packet when UDP NAT hole punching through supernode (default 0 for not set )
+-p <local port>          | Fixed local UDP port.
+-u <UID>                 | User ID (numeric) to use when privileges are dropped.
+-g <GID>                 | Group ID (numeric) to use when privileges are dropped.
+-f                       | Do not fork and run as a daemon; rather run in foreground.
+-m <MAC address>         | Fix MAC address for the TAP interface (otherwise it may be random)
+                         | eg. -m 01:02:03:04:05:06
+-M <mtu>                 | Specify n2n MTU of edge interface (default 1290).
+-D                       | Enable PMTU discovery. PMTU discovery can reduce fragmentation but
+                         | causes connections stall when not properly supported.
+-r                       | Enable packet forwarding through n2n community.
+-A1                      | Disable payload encryption. Do not use with key (defaulting to Twofish then).
+-A2 ... -A5 or -A        | Choose a cipher for payload encryption, requires a key: -A2 = Twofish (default),
+                         | -A3 or -A (deprecated) = AES-CBC, -A5 = Speck-CTR.
+-H                       | Enable full header encryption. Requires supernode with fixed community.
+-z1 ... -z2 or -z        | Enable compression for outgoing data packets: -z1 or -z = lzo1x (default=disabled).
+-E                       | Accept multicast MAC addresses (default=drop).
+-S                       | Do not connect P2P. Always use the supernode.
+-T <tos>                 | TOS for packets (e.g. 0x48 for SSH like priority)
+-n <cidr:gateway>        | Route an IPv4 network via the gw. Use 0.0.0.0/0 for the default gw. Can be set multiple times.
+-v                       | Make more verbose. Repeat as required.
+-t <port>                | Management UDP Port (for multiple edges on a machine).
+
+Environment variables:
+  N2N_KEY                | Encryption key (ASCII). Not with -k.
+bash-5.0# 
+```
+
+
 
 ### 更多帮助请参考
 
-[好运博客][好运博客]中[N2N 新手向导及最新信息][N2N 新手向导及最新信息]
-
-更多节点请访问 [N2N中心节点][N2N中心节点]
-
-[n2n]: https://web.archive.org/web/20110924083045/http://www.ntop.org:80/products/n2n/ "n2n官网"
 [ntop]: https://github.com/ntop "ntop团队"
+[客户端下载]: https://github.com/lucktu/n2n "客户端下载"
 [组网示意]: https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png "组网示意"
 [连接原理]: https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_com.png "连接原理"
-[好运博客]: http://www.lucktu.com "好运博客"
 [N2N 新手向导及最新信息]: http://www.lucktu.com/archives/783.html "N2N 新手向导及最新信息（2019-12-05 更新）"
-[N2N中心节点]: http://supernode.ml/ "N2N中心节点"
+[N2N中心节点]: http://supernode.ml/ "N2N免费中心节点"
 [github地址]: https://github.com/zctmdc/docker/n2n-ntop "github地址"
