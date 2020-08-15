@@ -183,15 +183,22 @@ edge -d <tun device> -a [static:|dhcp:]<tun IP address> -c <community> [-k <encr
 
 Environment variables:
   N2N_KEY                | Encryption key (ASCII). Not with -k.
-bash-5.0# 
+
+
+#若直接通过命令行启动,可以参考下列命令:
+./edge -d edge -a dhcp 0.0.0.0 \
+       -c fucking_proxy \
+       -k fucking_proxy \
+       -l 123.2.1.2:10086 \
+       -r -A -v 
 ```
 
 
-
-[ntop]: https://github.com/ntop "ntop团队"
-[客户端下载]: https://github.com/lucktu/n2n "客户端下载"
-[组网示意]: https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png "组网示意"
-[连接原理]: https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_com.png "连接原理"
-[N2N 新手向导及最新信息]: http://www.lucktu.com/archives/783.html "N2N 新手向导及最新信息（2019-12-05 更新）"
-[N2N中心节点]: http://supernode.ml/ "N2N免费中心节点"
-[github地址]: https://github.com/zctmdc/docker/n2n-ntop "github地址"
+参考:
+"ntop团队": https://github.com/ntop 
+"客户端下载": https://github.com/lucktu/n2n 
+"组网示意": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png 
+"连接原理": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_com.png 
+"N2N 新手向导及最新信息（2019-12-05 更新）": http://www.lucktu.com/archives/783.html 
+"N2N免费中心节点": http://supernode.ml/ 
+"github地址": https://github.com/zctmdc/docker/n2n-ntop 
