@@ -21,11 +21,11 @@ n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常
 
 ### 组网示意
 
-![组网示意][组网示意]
+![n2n_com](README.assets/n2n_com.png)
 
 ### 连接原理
 
-![连接原理][连接原理]
+![n2n_network](README.assets/n2n_network.png)
 
 ## 快速上手
 
@@ -192,6 +192,29 @@ Environment variables:
        -l 123.2.1.2:10086 \
        -r -A -v 
 ```
+
+
+
+## 组网
+
+### 点对网
+
+  所谓"点对网",就是指edge节点可以和某个edge节点所处的局域网内的所有主机通信
+
+  具体实现方式,可以参考下图所示:
+
+![点对网实现示意图](README.assets/image-20200816003916590.png)
+
+
+
+主机A1相关路由信息:
+
+![主机A1相关路由信息](README.assets/image-20200816004216533.png)
+
+主机B1相关路由信息:
+
+![主机B1相关路由信息](README.assets/image-20200816004244723.png)
+
 
 
 参考:
