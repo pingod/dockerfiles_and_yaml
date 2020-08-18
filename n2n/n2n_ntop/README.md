@@ -2,7 +2,7 @@
 
 ## 关于
 
-[n2n][n2n] 是一个[ntop 团队][ntop] 推出的 **第二层对等 VPN**，可轻松创建绕过中间防火墙的虚拟网络。
+[n2n] 是一个[ntop 团队] 推出的 **第二层对等 VPN**，可轻松创建绕过中间防火墙的虚拟网络。
 
 N2N 是通过UDP方式建立链接，如果某个网络禁用了 UDP，那么该网络下的设备就不适合使用本软件来加入这个虚拟局域网
 
@@ -218,10 +218,16 @@ Environment variables:
 
 
 参考:
-"ntop团队": https://github.com/ntop 
-"客户端下载": https://github.com/lucktu/n2n 
-"组网示意": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png 
-"连接原理": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_com.png 
-"N2N 新手向导及最新信息（2019-12-05 更新）": http://www.lucktu.com/archives/783.html 
-"N2N免费中心节点": http://supernode.ml/ 
-"github地址": https://github.com/zctmdc/docker/n2n-ntop 
+"ntop团队": https://github.com/ntop
+
+"客户端下载": https://github.com/lucktu/n2n
+
+"组网示意": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png
+
+"连接原理": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_com.png
+
+"N2N 新手向导及最新信息（2019-12-05 更新）": http://www.lucktu.com/archives/783.html
+
+"N2N免费中心节点": http://supernode.ml/
+
+"github地址": https://github.com/zctmdc/docker/n2n-ntop

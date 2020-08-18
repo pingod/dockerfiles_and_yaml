@@ -95,9 +95,9 @@ metadata:
   name: ofss-config-env
   namespace: kube-system
 data:
-  hostname_in_docker: daocloud-k8s-sh
-  ip_out_docker: 10.25.10.20
-  server_addr: bbs.itaojin.me
+  hostname_in_docker: ksc-wjwhlw-k8s01-ssh
+  ip_out_docker: 10.73.48.130
+  server_addr: 120.92.45.119
   ssh_port_out_docker: '22'
 #下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
   OPENVPN: /etc/openvpn
@@ -115,7 +115,7 @@ data:
   frpc-lite.ini: |-
     [common]
     server_addr = 0.0.0.0
-    server_port = 7100
+    server_port = 1443
     log_file = console
     log_level = info
     log_max_days = 3
@@ -136,7 +136,7 @@ data:
     type = tcp
     local_ip = 127.0.0.1
     local_port = 22
-    remote_port = 0
+    remote_port = 1444
     use_encryption = true
     use_compression = true
 
@@ -144,7 +144,7 @@ data:
     type = tcp
     local_ip = ip_out_docker
     local_port = ssh_port_out_docker
-    remote_port = 0
+    remote_port = 1445
     use_encryption = false
     use_compression = false
 
@@ -153,42 +153,51 @@ data:
     type = tcp
     local_ip = open
     local_port = 1194
-    remote_port = 0
-    use_encryption = false
+    remote_port = 1446
+    use_encryption = true
     use_compression = false
 
     [range:openvpn hostname_in_docker]
     type = udp
     local_ip = open
     local_port = 1194
-    remote_port = 0
-    use_encryption = false
+    remote_port = 1447
+    use_encryption = true
     use_compression = false
 
     [range:squid hostname_in_docker]
     type = tcp
     local_ip = squid
     local_port = 3128
-    remote_port = 0
-    use_encryption = false
-    use_compression = false
+    remote_port = 1448
+    use_encryption = true
+    use_compression = true
 
 ---
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  labels:
-    dce.daocloud.io/app: forbusiness
   name: frpc
 spec:
   selector:
     matchLabels:
-      dce.daocloud.io/app: forbusiness
+      app: frpc
   template:
     metadata:
       labels:
         app: frpc
-      name: frpc
+    # spec:
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: kubernetes.io/hostname
+      #           operator: In
+      #           values:
+      #           - k8s-master1
+      #           - k8s-master2
+      #           - k8s-master3
     spec:
       containers:
       - envFrom:
@@ -220,29 +229,34 @@ spec:
         hostPath:
           path: /data/tools/frp
           type: ''
+      nodeSelector:
+        kubernetes.io/hostname: k8s-master1
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
 ---
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "8"
-  labels:
-    dce.daocloud.io/app: forbusiness
   name: nps
 spec:
   selector:
     matchLabels:
-      dce.daocloud.io/app: forbusiness
+      app: nps
   template:
     metadata:
       labels:
         app: nps
-      name: nps
     spec:
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
       containers:
       - env:
         - name: NPC_SERVER_ADDR
-          value: 118.25.50.157:8024
+          value: 123.57.3.122:8024
         - name: NPC_SERVER_VKEY
           value: f5r2g0vpgoqjfx7u
         image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/nps:client-v1.0
@@ -257,33 +271,23 @@ spec:
             memory: "209715200"
       dnsPolicy: ClusterFirst
 ---
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "6"
-  labels:
-    dce.daocloud.io/app: forbusiness
   name: open
 spec:
   selector:
     matchLabels:
-      dce.daocloud.io/app: forbusiness
+      app: open
   template:
     metadata:
       labels:
         app: open
-      name: open
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - dce-bj-node-14
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
       containers:
       - envFrom:
         - configMapRef:
@@ -309,24 +313,30 @@ spec:
           path: /data/tools/openvpn/
           type: ""
         name: hostpath-open
+      nodeSelector:
+        kubernetes.io/hostname: k8s-master1
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
 ---
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  labels:
-    dce.daocloud.io/app: forbusiness
   name: squid
 spec:
   selector:
     matchLabels:
-      dce.daocloud.io/app: forbusiness
+      app: squid
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: squid
-      name: squid
     spec:
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
       containers:
       - image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/squid:alpine-v0.2
         imagePullPolicy: Always
@@ -363,7 +373,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    dce.daocloud.io/app: forbusiness
+    app-service: frpc
   name: frpc
 spec:
   ports:
@@ -380,7 +390,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    dce.daocloud.io/app: forbusiness
+    app-service: open
   name: open
 spec:
   ports:
@@ -396,7 +406,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    dce.daocloud.io/app: forbusiness
+    app-service: squid
   name: squid
 spec:
   ports:
@@ -416,7 +426,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    dce.daocloud.io/app: forbusiness
+    app-service: nps
   name: nps
 spec:
   ports:
