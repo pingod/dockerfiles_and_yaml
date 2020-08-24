@@ -2,7 +2,7 @@
 
 ## 关于
 
-[n2n][n2n] 是一个[ntop 团队][ntop] 推出的 **第二层对等 VPN**，可轻松创建绕过中间防火墙的虚拟网络。
+[n2n] 是一个[ntop 团队] 推出的 **第二层对等 VPN**，可轻松创建绕过中间防火墙的虚拟网络。
 
 N2N 是通过UDP方式建立链接，如果某个网络禁用了 UDP，那么该网络下的设备就不适合使用本软件来加入这个虚拟局域网
 
@@ -21,11 +21,11 @@ n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常
 
 ### 组网示意
 
-![组网示意][组网示意]
+![n2n_com](README.assets/n2n_com.png)
 
 ### 连接原理
 
-![连接原理][连接原理]
+![n2n_network](README.assets/n2n_network.png)
 
 ## 快速上手
 
@@ -183,15 +183,51 @@ edge -d <tun device> -a [static:|dhcp:]<tun IP address> -c <community> [-k <encr
 
 Environment variables:
   N2N_KEY                | Encryption key (ASCII). Not with -k.
-bash-5.0# 
+
+
+#若直接通过命令行启动,可以参考下列命令:
+./edge -d edge -a dhcp 0.0.0.0 \
+       -c fucking_proxy \
+       -k fucking_proxy \
+       -l 123.2.1.2:10086 \
+       -r -A -v 
 ```
 
 
 
-[ntop]: https://github.com/ntop "ntop团队"
-[客户端下载]: https://github.com/lucktu/n2n "客户端下载"
-[组网示意]: https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png "组网示意"
-[连接原理]: https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_com.png "连接原理"
-[N2N 新手向导及最新信息]: http://www.lucktu.com/archives/783.html "N2N 新手向导及最新信息（2019-12-05 更新）"
-[N2N中心节点]: http://supernode.ml/ "N2N免费中心节点"
-[github地址]: https://github.com/zctmdc/docker/n2n-ntop "github地址"
+## 组网
+
+### 点对网
+
+  所谓"点对网",就是指edge节点可以和某个edge节点所处的局域网内的所有主机通信
+
+  具体实现方式,可以参考下图所示:
+
+![点对网实现示意图](README.assets/image-20200816003916590.png)
+
+
+
+主机A1相关路由信息:
+
+![主机A1相关路由信息](README.assets/image-20200816004216533.png)
+
+主机B1相关路由信息:
+
+![主机B1相关路由信息](README.assets/image-20200816004244723.png)
+
+
+
+参考:
+"ntop团队": https://github.com/ntop
+
+"客户端下载": https://github.com/lucktu/n2n
+
+"组网示意": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_network.png
+
+"连接原理": https://web.archive.org/web/20110924083045im_/http://www.ntop.org/wp-content/uploads/2011/08/n2n_com.png
+
+"N2N 新手向导及最新信息（2019-12-05 更新）": http://www.lucktu.com/archives/783.html
+
+"N2N免费中心节点": http://supernode.ml/
+
+"github地址": https://github.com/zctmdc/docker/n2n-ntop
