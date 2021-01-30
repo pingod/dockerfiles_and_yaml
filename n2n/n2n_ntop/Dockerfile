@@ -49,5 +49,5 @@ ENV STATIC_IP 10.0.10.10
 ENV N2N_GROUP funny_proxy
 ENV N2N_PASS funny_proxy
 ENV N2N_SERVER www.funny.com:10086
-ENV N2N_ARGS -Av
+ENV N2N_ARGS -A2 v
 CMD [ "/bin/bash" , "-c" , "/usr/local/sbin/run.sh" ]
