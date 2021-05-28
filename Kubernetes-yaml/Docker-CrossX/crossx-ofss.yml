@@ -5,9 +5,9 @@ metadata:
   name: ofss-config-env
   namespace: kube-system
 data:
-  hostname_in_docker: daocloud-k8s-sh
-  ip_out_docker: 10.25.10.20
-  server_addr: bbs.itaojin.me
+  hostname_in_docker: ksc-shisu-k8s
+  ip_out_docker: 10.25.10.46
+  server_addr: 123.57.3.122
   ssh_port_out_docker: '22'
 #下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
   OPENVPN: /etc/openvpn
@@ -31,6 +31,7 @@ data:
     log_level = info
     log_max_days = 3
     privilege_token = 405520
+    token = 405520
 
     admin_addr = 127.0.0.1
     admin_port = 7400
@@ -154,4 +155,8 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - dce-bj-node-13
+                      - master
+        tolerations:
+         - key: node-role.kubernetes.io/master
+           operator: Exists
+           effect: NoSchedule
