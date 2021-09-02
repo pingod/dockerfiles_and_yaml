@@ -12,7 +12,7 @@ services:
       - N2N_GROUP=funny_proxy
       - N2N_PASS=funny_proxy
       - N2N_SERVER=www.funny.com:10086
-      - N2N_ARGS=-Av
+      - N2N_ARGS=-A2 -v
     # volumes:
     #   - ./dhcpd.conf:/etc/dhcp/dhcpd.conf:ro
     command: ["/bin/sh","-c","/usr/local/sbin/run.sh"]
@@ -27,7 +27,7 @@ services:
       - N2N_GROUP=funny_proxy
       - N2N_PASS=funny_proxy
       - N2N_SERVER=www.funny.com:10086
-      - N2N_ARGS=-Avr
+      - N2N_ARGS=-A2 -vr
     command: ["/bin/sh","-c","/usr/local/sbin/run.sh"]
   n2n_edge_static:
     image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n:latest
@@ -41,7 +41,7 @@ services:
       - N2N_GROUP=funny_proxy
       - N2N_PASS=funny_proxy
       - N2N_SERVER=www.funny.com:10086
-      - N2N_ARGS=-Av
+      - N2N_ARGS=-A2 -v
     command: ["/bin/sh","-c","/usr/local/sbin/run.sh"]
   n2n_supernode:
     image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n:latest

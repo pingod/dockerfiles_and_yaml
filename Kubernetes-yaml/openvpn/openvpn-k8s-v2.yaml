@@ -38,7 +38,7 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - k8s-master01
+                - vm10-30-0-46
       tolerations:
         - key: "node-role.kubernetes.io/master"
           operator: "Exists"
@@ -79,7 +79,7 @@ metadata:
   name: open
 spec:
   ports:
-  - nodePort: 30053
+  - nodePort: 18868
     port: 1194
     protocol: TCP
     targetPort: 1194

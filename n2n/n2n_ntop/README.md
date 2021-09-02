@@ -52,7 +52,7 @@ docker run \
   -e MODE="SUPERNODE" \
   -e SUPERNODE_PORT=10086 \
   -p 10086:10086/udp \
-  -e N2N_ARGS="-v" \
+  -e N2N_ARGS="-A2 -v" \
   registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n
 ```
 
@@ -69,7 +69,7 @@ docker run \
   -e N2N_GROUP="zctmdc_proxy" \
   -e N2N_PASS="zctmdc_proxy" \
   -e N2N_SERVER="n2n.lucktu.com:10086" \
-  -e N2N_ARGS="-A -v" \
+  -e N2N_ARGS="-A2 -v" \
   registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n
 ```
 
@@ -86,7 +86,7 @@ docker run \
 |N2N_GROUP|组网名称|在EDGE中使用|-c|funny_proxy|
 |N2N_PASS|组网密码|在EDGE中使用|-k|funny_proxy|
 |N2N_INTERFACE|网卡名|edge生成的网卡名字|-d|edge0|
-|N2N_ARGS|更多参数|运行时附加的更多参数|-Av|-Av|
+|N2N_ARGS|更多参数|运行时附加的更多参数|-Av|-A2 -v|
 
 
 
