@@ -7,6 +7,7 @@
 [Docker](https://docker.io/) recipe for [x2go](https://wiki.x2go.org/doku.php) project
 
 ### Create an image with xterm
+registry.cn-hangzhou.aliyuncs.com/sourcegarden/x2go-debain:v1
 
 ```
 docker pull spielhuus/x2go
