@@ -7,3 +7,6 @@
 [submodule "nsenter"]
 	path = nsenter
 	url = git@github.com:pingod/nsenter.git
+[submodule "docker-openvpn"]
+	path = docker-openvpn
+	url = git@github.com:pingod/docker-openvpn.git
