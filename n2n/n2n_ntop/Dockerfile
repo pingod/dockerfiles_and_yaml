@@ -15,7 +15,7 @@ RUN buildDeps=" \
 	\
 	set -x \ 
 	&& apk add --update --no-cache --virtual .build-deps $buildDeps \
-	&& git clone -b 2.8-stable https://github.com/ntop/n2n.git \
+	&& git clone -b 3.0-stable https://github.com/ntop/n2n.git \
   && cd n2n \
   && cmake . \
 	&& make install
