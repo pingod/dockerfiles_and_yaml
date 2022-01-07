@@ -1,53 +1,70 @@
-FROM alpine AS builder 
+FROM debian:buster-slim as builder
 
-MAINTAINER zctmdc <zctmdc@outlook.com>
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+  bash curl ca-certificates wget unzip
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-############start build############
-WORKDIR /tmp
-RUN buildDeps=" \
-		build-base \
-		cmake \
-		git \
-		linux-headers \
-		openssl-dev \
-	"; \
-	\
-	set -x \ 
-	&& apk add --update --no-cache --virtual .build-deps $buildDeps \
-	&& git clone -b 3.0-stable https://github.com/ntop/n2n.git \
-  && cd n2n \
-  && cmake . \
-	&& make install
-WORKDIR /tmp
-RUN rm -rf /tmp/* \
-	&& apk del .build-deps
-############end build############
-FROM alpine
+WORKDIR /tmp/
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+COPY *.sh /tmp/
 
-RUN apk add --update --no-cache openssl dhclient dhcp-server-ldap bash
+RUN chmod +x /tmp/*.sh && /tmp/down_n2n.sh
 
-COPY --from=builder /usr/local/bin/n2n-benchmark /usr/local/sbin/
-COPY --from=builder /usr/local/sbin/supernode /usr/local/sbin/
-COPY --from=builder /usr/local/sbin/edge /usr/local/sbin/
-# COPY ./dhcpd.conf /etc/dhcp/dhcpd.conf
-COPY run.sh /usr/local/sbin/
-COPY n2n.sh /usr/local/sbin/
+FROM debian:buster-slim
 
-RUN  chmod a+x /usr/local/sbin/run.sh \
-	&& chmod a+x /usr/local/sbin/n2n.sh \
-	&& touch /var/lib/dhcp/dhcpd.leases \
-	&& touch /var/log/n2n.log \
-	&& touch /var/log/run.log 
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y upgrade 
+RUN apt-get -y install \
+  apt-utils tzdata \
+  && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+  && echo "Asia/Shanghai" > /etc/timezone \
+  && dpkg-reconfigure -f noninteractive tzdata
+##################-----##################
 
-ENV MODE DHCPD
+RUN apt-get install -y \
+  wget openssl isc-dhcp-client isc-dhcp-server net-tools iputils-ping \
+  curl  ca-certificates traceroute htop psmisc iptables \
+  && rm -rf /etc/dhcp/dhcpd.conf
+
+##################-----##################
+RUN apt-get clean 
+
+RUN mkdir -p /usr/local/sbin/
+
+COPY --from=builder \
+  /tmp/n2n/supernode \
+  /tmp/n2n/edge \
+  /usr/local/sbin/
+
+
+COPY *.sh /usr/local/sbin/
+
+# RUN chmod a+x /usr/local/sbin/* \
+#   && . /usr/local/sbin/init.sh \
+#   && wget --no-check-certificate -qO /usr/local/sbin/edge http://rt.qiniu.zctmdc.cn/bin/edge_v2_${myos}_${mycpu} \
+#   && wget --no-check-certificate -qO /usr/local/sbin/supernode http://rt.qiniu.zctmdc.cn/bin/supernode_v2_${myos}_${mycpu}
+
+
+RUN set -x \
+  && chmod a+x /usr/local/sbin/*
+
+ENV MODE SUPERNODE
+
+ENV N2N_ARGS "-v -f"
+
+ENV SUPERNODE_HOST n2n.lucktu.com
 ENV SUPERNODE_PORT 10086
-ENV N2N_INTERFACE edge0
-ENV STATIC_IP 10.0.10.10
-ENV N2N_GROUP funny_proxy
-ENV N2N_PASS funny_proxy
-ENV N2N_SERVER www.funny.com:10086
-ENV N2N_ARGS -A2 v
+
+ENV EDGE_IP 10.10.10.10
+ENV EDGE_NETMASK 255.255.255.0
+ENV EDGE_COMMUNITY n2n
+ENV EDGE_KEY test
+ENV EDGE_TUN edge0
+ENV EDGE_ENCRYPTION A3
+ENV EDGE_REG_INTERVAL 5
+ENV EDGE_MTU 1290
+ENV EDGE_UDP_PORT ""
+
 CMD [ "/bin/bash" , "-c" , "/usr/local/sbin/run.sh" ]
+
+HEALTHCHECK --interval=20s --timeout=10s CMD /usr/local/sbin/n2n_healthcheck.sh
