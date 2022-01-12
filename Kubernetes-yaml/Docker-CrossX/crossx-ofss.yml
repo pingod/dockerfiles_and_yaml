@@ -5,11 +5,8 @@ metadata:
   name: ofss-config-env
   namespace: kube-system
 data:
-  hostname_in_docker: ksc-wjwhlw-k8s01-ssh
-  ip_out_docker: 10.73.48.130
-  server_addr: 120.92.45.119
-  hostname_in_docker: ksc-shisu-k8s
-  ip_out_docker: 10.25.10.46
+  hostname_in_docker: slef-ali-k8s
+  ip_out_docker: 172.16.0.102
   server_addr: 123.57.3.122
   ssh_port_out_docker: '22'
 #下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
