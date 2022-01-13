@@ -5,15 +5,9 @@ metadata:
   name: ofss-config-env
   namespace: kube-system
 data:
-<<<<<<< HEAD
-  hostname_in_docker: ksc-wjwhlw-k8s01-ssh
-  ip_out_docker: 10.73.48.130
-  server_addr: 120.92.45.119
-=======
-  hostname_in_docker: ksc-shisu-k8s
-  ip_out_docker: 10.25.10.46
-  server_addr: 123.57.3.122
->>>>>>> 9e39886b29c30fef123a197f924b7ea8556ad469
+  hostname_in_docker: slef-ali-k8s
+  ip_out_docker: 172.16.0.102
+  server_addr: xxx.xxx.xxx.xxx
   ssh_port_out_docker: '22'
 #下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
   OPENVPN: /etc/openvpn
@@ -32,25 +26,17 @@ data:
   frpc-lite.ini: |-
     [common]
     server_addr = 0.0.0.0
-    server_port = 1433
+    server_port = 712100
     log_file = console
     log_level = info
     log_max_days = 3
-<<<<<<< HEAD
-    token = ksc-cloud
-=======
-    privilege_token = 405520
-    token = 405520
->>>>>>> 9e39886b29c30fef123a197f924b7ea8556ad469
-
+    token = 40ssa5520
     admin_addr = 127.0.0.1
     admin_port = 7400
     admin_user = admin
     admin_pwd = admin
-
     pool_count = 5
     tcp_mux = true
-    #user = your_name
     login_fail_exit = true
     protocol = tcp
 
@@ -115,7 +101,7 @@ spec:
     spec:
       containers:
         - name: ofss
-          image: 'registry.cn-hangzhou.aliyuncs.com/sourcegarden/openvpn-fss:v0.3'
+          image: 'registry.cn-hangzhou.aliyuncs.com/sourcegarden/openvpn-fss:v0.7'
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
@@ -163,23 +149,12 @@ spec:
             #defaultMode: 420
       restartPolicy: Always
       dnsPolicy: ClusterFirst
-<<<<<<< HEAD
-      # affinity:
-      #   nodeAffinity:
-      #     requiredDuringSchedulingIgnoredDuringExecution:
-      #       nodeSelectorTerms:
-      #         - matchExpressions:
-      #             - key: kubernetes.io/hostname
-      #               operator: In
-      #               values:
-      #                 - k8s-master1
       nodeSelector:
-        kubernetes.io/hostname: k8s-master1
+        kubernetes.io/hostname: cn-hongkong.172.16.0.101
       tolerations:
        - key: node-role.kubernetes.io/master
          operator: Exists
          effect: NoSchedule
-=======
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -189,8 +164,3 @@ spec:
                     operator: In
                     values:
                       - master
-        tolerations:
-         - key: node-role.kubernetes.io/master
-           operator: Exists
-           effect: NoSchedule
->>>>>>> 9e39886b29c30fef123a197f924b7ea8556ad469
