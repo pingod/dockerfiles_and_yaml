@@ -1,8 +1,12 @@
 # 基于docker的网络目录浏览器
+- 你可以试试这个：
+  -   https://github.com/svenstaro/miniserve 
+  -   https://hub.docker.com/r/svenstaro/miniserve
 
 基于nginx的静态文件服务器，列出目录
 
 默认内部挂载点为 `/workpath`
+
 
 ## 运行方法
 
@@ -12,7 +16,7 @@
 docker run -ti --rm \
  -v path-to-dir:/workpath \
  -p 80:80 \
- zctmdc/file-server:Alpha
+ zctmdc/file-server:Beta
 ```
 
 ### docker-compose
@@ -33,7 +37,7 @@ docker run \
  -ti --rm \
  -v path-to-iso:/workpath \
  -p 8088:80 \
- zctmdc/file-server:Alpha
+ zctmdc/file-server:Beta
 ```
 
 > 挂载文件的方式为 `mount -o loop $file` ，其他类型文件可能会出错！
