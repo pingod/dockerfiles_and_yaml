@@ -95,9 +95,9 @@ metadata:
   name: ofss-config-env
   namespace: kube-system
 data:
-  hostname_in_docker: ksc-wjwhlw-k8s01-ssh
-  ip_out_docker: 10.73.48.130
-  server_addr: 120.92.45.119
+  hostname_in_docker: ts-qf-eks-useast1-dev01
+  ip_out_docker: 10.2.19.250
+  server_addr: x.x.x.x
   ssh_port_out_docker: '22'
 #下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
   OPENVPN: /etc/openvpn
@@ -114,12 +114,12 @@ metadata:
 data:
   frpc-lite.ini: |-
     [common]
-    server_addr = 0.0.0.0
-    server_port = 1443
+    server_addr = x.x.x.x
+    server_port = 7100
     log_file = console
     log_level = info
     log_max_days = 3
-    privilege_token = 405520
+    token = 405521
 
     admin_addr = 127.0.0.1
     admin_port = 7400
@@ -144,24 +144,24 @@ data:
     type = tcp
     local_ip = ip_out_docker
     local_port = ssh_port_out_docker
-    remote_port = 1445
+    remote_port = 0
     use_encryption = false
     use_compression = false
 
 
-    [range:openvpn hostname_in_docker]
+    [range:tovn hostname_in_docker]
     type = tcp
     local_ip = open
     local_port = 1194
-    remote_port = 1446
+    remote_port = 0
     use_encryption = true
     use_compression = false
 
-    [range:openvpn hostname_in_docker]
+    [range:uovn hostname_in_docker]
     type = udp
     local_ip = open
     local_port = 1194
-    remote_port = 1447
+    remote_port = 0
     use_encryption = true
     use_compression = false
 
@@ -174,7 +174,7 @@ data:
     use_compression = true
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frpc
@@ -236,42 +236,7 @@ spec:
          operator: Exists
          effect: NoSchedule
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: nps
-spec:
-  selector:
-    matchLabels:
-      app: nps
-  template:
-    metadata:
-      labels:
-        app: nps
-    spec:
-      tolerations:
-       - key: node-role.kubernetes.io/master
-         operator: Exists
-         effect: NoSchedule
-      containers:
-      - env:
-        - name: NPC_SERVER_ADDR
-          value: 123.57.3.122:8024
-        - name: NPC_SERVER_VKEY
-          value: f5r2g0vpgoqjfx7u
-        image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/nps:client-v1.0
-        imagePullPolicy: Always
-        name: nps
-        resources:
-          limits:
-            cpu: 200m
-            memory: "209715200"
-          requests:
-            cpu: "0"
-            memory: "209715200"
-      dnsPolicy: ClusterFirst
----
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: open
@@ -320,7 +285,7 @@ spec:
          operator: Exists
          effect: NoSchedule
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: squid
@@ -368,72 +333,107 @@ spec:
             type: FileOrCreate
       dnsConfig: {}
       dnsPolicy: ClusterFirst
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app-service: frpc
-  name: frpc
-spec:
-  ports:
-  - name: frpc-1194
-    port: 1194
-    protocol: TCP
-    targetPort: 1194
-  selector:
-    app: frpc
-  sessionAffinity: None
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app-service: open
-  name: open
-spec:
-  ports:
-  - name: open-1194
-    port: 1194
-    protocol: TCP
-    targetPort: 1194
-  selector:
-    app: open
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app-service: squid
-  name: squid
-spec:
-  ports:
-  - name: squid-3128
-    port: 3128
-    protocol: TCP
-    targetPort: 3128
-  - name: squid-4128
-    port: 4128
-    protocol: TCP
-    targetPort: 4128
-  selector:
-    app: squid
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app-service: nps
-  name: nps
-spec:
-  ports:
-  - name: nps-9100
-    port: 9100
-    protocol: TCP
-    targetPort: 9100
-  selector:
-    app: nps
-  type: ClusterIP
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: nps
+# spec:
+#   selector:
+#     matchLabels:
+#       app: nps
+#   template:
+#     metadata:
+#       labels:
+#         app: nps
+#     spec:
+#       tolerations:
+#        - key: node-role.kubernetes.io/master
+#          operator: Exists
+#          effect: NoSchedule
+#       containers:
+#       - env:
+#         - name: NPC_SERVER_ADDR
+#           value: 123.57.3.122:8024
+#         - name: NPC_SERVER_VKEY
+#           value: f5r2g0vpgoqjfx7u
+#         image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/nps:client-v1.0
+#         imagePullPolicy: Always
+#         name: nps
+#         resources:
+#           limits:
+#             cpu: 200m
+#             memory: "209715200"
+#           requests:
+#             cpu: "0"
+#             memory: "209715200"
+#       dnsPolicy: ClusterFirst
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: frpc
+#   name: frpc
+# spec:
+#   ports:
+#   - name: frpc-1194
+#     port: 1194
+#     protocol: TCP
+#     targetPort: 1194
+#   selector:
+#     app: frpc
+#   sessionAffinity: None
+#   type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: open
+#   name: open
+# spec:
+#   ports:
+#   - name: open-1194
+#     port: 1194
+#     protocol: TCP
+#     targetPort: 1194
+#   selector:
+#     app: open
+#   type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: squid
+#   name: squid
+# spec:
+#   ports:
+#   - name: squid-3128
+#     port: 3128
+#     protocol: TCP
+#     targetPort: 3128
+#   - name: squid-4128
+#     port: 4128
+#     protocol: TCP
+#     targetPort: 4128
+#   selector:
+#     app: squid
+#   type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: nps
+#   name: nps
+# spec:
+#   ports:
+#   - name: nps-9100
+#     port: 9100
+#     protocol: TCP
+#     targetPort: 9100
+#   selector:
+#     app: nps
+#   type: ClusterIP

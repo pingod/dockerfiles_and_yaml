@@ -5,9 +5,9 @@ metadata:
   name: ofss-config-env
   namespace: kube-system
 data:
-  hostname_in_docker: slef-ali-k8s
-  ip_out_docker: 172.16.0.102
-  server_addr: xxx.xxx.xxx.xxx
+  hostname_in_docker: xuchang-k8s-k8s-55
+  ip_out_docker: 172.16.0.11
+  server_addr: 123.57.3.2
   ssh_port_out_docker: '22'
 #下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
   OPENVPN: /etc/openvpn
@@ -25,12 +25,12 @@ metadata:
 data:
   frpc-lite.ini: |-
     [common]
-    server_addr = 0.0.0.0
-    server_port = 712100
+    server_addr = 123.57.3.2
+    server_port = 71002
     log_file = console
     log_level = info
     log_max_days = 3
-    token = 40ssa5520
+    token = 40552022
     admin_addr = 127.0.0.1
     admin_port = 7400
     admin_user = admin
@@ -44,7 +44,7 @@ data:
     type = tcp
     local_ip = 127.0.0.1
     local_port = 22
-    remote_port = 1445
+    remote_port = 0
     use_encryption = true
     use_compression = true
 
@@ -52,12 +52,12 @@ data:
     type = tcp
     local_ip = ip_out_docker
     local_port = ssh_port_out_docker
-    remote_port = 1446
+    remote_port = 0
     use_encryption = false
     use_compression = false
 
 
-    [range:openvpn hostname_in_docker]
+    [range:tovn hostname_in_docker]
     type = tcp
     local_ip = 127.0.0.1
     local_port = 1447
@@ -65,11 +65,11 @@ data:
     use_encryption = false
     use_compression = false
 
-    [range:openvpn hostname_in_docker]
+    [range:uovn hostname_in_docker]
     type = udp
     local_ip = 127.0.0.1
     local_port = 1194
-    remote_port = 1447
+    remote_port = 0
     use_encryption = false
     use_compression = false
 
@@ -77,7 +77,7 @@ data:
     type = tcp
     local_ip = 127.0.0.1
     local_port = 3128
-    remote_port = 1449
+    remote_port = 0
     use_encryption = true
     use_compression = false
 
@@ -124,6 +124,8 @@ spec:
               mountPath: /etc/openvpn
             - name: hostpath-frpc
               mountPath: /etc/frp
+            - name: hostpath-ssh
+              mountPath: /root/.ssh
           securityContext:
             privileged: true
       volumes:
@@ -143,24 +145,28 @@ spec:
           hostPath:
             path: /data/tools/ofss/frpc
             type: ''
+        - name: hostpath-ssh
+          hostPath:
+            path: /root/.ssh/
+            type: ''
         # - name: ofss-config-frp-nouse
         #   configMap:
         #     name: ofss-config-frpc
             #defaultMode: 420
       restartPolicy: Always
       dnsPolicy: ClusterFirst
-      nodeSelector:
-        kubernetes.io/hostname: cn-hongkong.172.16.0.101
-      tolerations:
-       - key: node-role.kubernetes.io/master
-         operator: Exists
-         effect: NoSchedule
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - master
+      # nodeSelector:
+      #   kubernetes.io/hostname: ds02
+      # tolerations:
+      #  - key: node-role.kubernetes.io/master
+      #    operator: Exists
+      #    effect: NoSchedule
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #         - matchExpressions:
+      #             - key: kubernetes.io/hostname
+      #               operator: In
+      #               values:
+      #                 - master
