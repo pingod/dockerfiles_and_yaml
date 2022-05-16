@@ -7,8 +7,7 @@ require (
 	github.com/caddyserver/certmagic v0.11.2
 	github.com/cenkalti/backoff/v4 v4.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/gin-gonic/gin v1.6.3
-	github.com/go-playground/validator/v10 v10.3.0 // indirect
+	github.com/gin-gonic/gin v1.7.0
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jpillora/ipfilter v1.2.1
@@ -28,7 +27,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.0
-	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
 	google.golang.org/protobuf v1.24.0 // indirect
