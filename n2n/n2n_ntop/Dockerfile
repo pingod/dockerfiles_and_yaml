@@ -1,8 +1,8 @@
 FROM debian:buster-slim as builder
 
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -yq \
-  bash curl ca-certificates wget unzip
+RUN apt-get update && apt-get install -y \
+    bash curl ca-certificates wget unzip
 
 WORKDIR /tmp/
 
@@ -10,24 +10,11 @@ COPY *.sh /tmp/
 
 RUN chmod +x /tmp/*.sh && /tmp/down_n2n.sh
 
-FROM debian:buster-slim
+FROM alpine
 
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -yq upgrade 
-RUN apt-get -yq install \
-  apt-utils tzdata \
-  && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-  && echo "Asia/Shanghai" > /etc/timezone \
-  && dpkg-reconfigure -f noninteractive tzdata
-##################-----##################
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone
 
-RUN apt-get install -yq \
-  wget openssl isc-dhcp-client isc-dhcp-server net-tools iputils-ping \
-  curl  ca-certificates traceroute htop psmisc iptables \
-  && rm -rf /etc/dhcp/dhcpd.conf
-
-##################-----##################
-RUN apt-get clean 
 
 RUN mkdir -p /usr/local/sbin/
 
@@ -38,11 +25,6 @@ COPY --from=builder \
 
 
 COPY *.sh /usr/local/sbin/
-
-# RUN chmod a+x /usr/local/sbin/* \
-#   && . /usr/local/sbin/init.sh \
-#   && wget --no-check-certificate -qO /usr/local/sbin/edge http://rt.qiniu.zctmdc.cn/bin/edge_v2_${myos}_${mycpu} \
-#   && wget --no-check-certificate -qO /usr/local/sbin/supernode http://rt.qiniu.zctmdc.cn/bin/supernode_v2_${myos}_${mycpu}
 
 
 RUN set -x \
