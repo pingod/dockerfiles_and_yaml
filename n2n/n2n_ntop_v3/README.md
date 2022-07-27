@@ -1,4 +1,4 @@
-# docker n2n_ntop:Alpha
+# docker n2n_ntop:Beta
 
 ## 关于
 
@@ -45,23 +45,12 @@ n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常
 
 ```bash
 docker run --rm -ti \
- -p 10086:10086 zctmdc/n2n_ntop:Alpha \
+ -p 10086:10086 zctmdc/n2n_ntop:Beta \
  supernode -l 10086 -v
 ```
 
 ### 建立 *supernode*
 
-* 前台模式
-
-```bash
-docker run \
-  --rm -ti \
-  -e MODE="SUPERNODE" \
-  -p 10086:10086/udp \
-  zctmdc/n2n_ntop:Alpha
-```
-
-* 后台模式
 
 ```bash
 docker run \
@@ -70,18 +59,10 @@ docker run \
   -e MODE="SUPERNODE" \
   -e SUPERNODE_PORT=10086 \
   -p 10086:10086/udp \
-  zctmdc/n2n_ntop:Alpha
+  zctmdc/n2n_ntop:Beta
 ```
 
 ### 建立 *edge*
-
-* 前台模式
-
-```bash
-docker run --rm -ti --privileged zctmdc/n2n_ntop:Alpha
-```
-
-* 后台模式
 
 ```bash
 docker run \
@@ -97,22 +78,12 @@ docker run \
   -e SUPERNODE_PORT=10086 \
   -e EDGE_ENCRYPTION=A3 \
   -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Alpha
+  zctmdc/n2n_ntop:Beta
 ```
 
 ## 更多模式
 
-### SUPERNODE - 超级节点
 
-```bash
-docker run \
-  -d --restart=always \
-  --name=supernode \
-  -e MODE="SUPERNODE" \
-  -e SUPERNODE_PORT=10086 \
-  -p 10086:10086/udp \
-  zctmdc/n2n_ntop:Alpha
-```
 
 ### DHCPD - DHCP服务端模式
 
@@ -130,7 +101,7 @@ docker run \
   -e SUPERNODE_PORT=10086 \
   -e EDGE_ENCRYPTION=A3 \
   -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Alpha
+  zctmdc/n2n_ntop:Beta
 ```
 
 
@@ -155,7 +126,7 @@ docker run \
   -e SUPERNODE_PORT=10086 \
   -e EDGE_ENCRYPTION=A3 \
   -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Alpha
+  zctmdc/n2n_ntop:Beta
 ```
 
 
@@ -175,7 +146,7 @@ docker run \
   -e SUPERNODE_PORT=10086 \
   -e EDGE_ENCRYPTION=A3 \
   -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Alpha
+  zctmdc/n2n_ntop:Beta
 ```
 
 
@@ -200,7 +171,7 @@ docker run \
 ## 使用 *docker-compose* 配置运行
 
 ```bash
-git clone -b alpha https://github.com/zctmdc/docker.git
+git clone -b Beta https://github.com/zctmdc/docker.git
 # docker-compose build #编译
 
 #启动 n2n_edge_dhcp
@@ -211,11 +182,7 @@ cd n2n_ntop
 
 更多介绍请访问 [docker-compose CLI概述][Overview of docker-compose CLI]
 
-## 告诉我你在用
 
-如果你使用正常了请点个赞
-[我的docker主页][zctmdc—docker] ，[n2n_ntop的docker项目页][n2n_ntop] 和 [我github的docker项目页][zctmdc—github]
-我将引起注意，不再随意的去更改和重命名空间/变量名
 
 [n2n]: https://web.archive.org/web/20110924083045/http://www.ntop.org:80/products/n2n/ "n2n官网"
 [ntop]: https://github.com/ntop "ntop团队"

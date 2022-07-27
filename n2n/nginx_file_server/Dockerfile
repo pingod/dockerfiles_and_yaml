@@ -8,10 +8,8 @@ RUN apt-get -yqq install \
   && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
   && echo "Asia/Shanghai" > /etc/timezone \
   && dpkg-reconfigure -f noninteractive tzdata
-##################-----##################
 
 
-##################-----##################
 RUN apt-get clean 
 
 RUN set -x \
