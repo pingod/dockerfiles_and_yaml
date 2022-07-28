@@ -1,6 +1,4 @@
-# docker n2n_ntop:Beta
-
-## 关于
+# 关于N2N
 
 [n2n][n2n] 是一个 **第二层对等 VPN**，可轻松创建绕过中间防火墙的虚拟网络。
 
@@ -31,138 +29,42 @@ n2n尽可能在edge节点之间建立直接的P2P连接;如果不可能（通常
 
 ## 快速入门
 
-### 代码换行
-
-通过以下符号分行,你可以分行输入你需要运行的代码
-
-|终端|符号|按键方法|
----:|:---:|:---|
-|bash| \\ | 回车键上方 |
-|powershell|**`**|键盘TAB按钮上方|
-|CMD|**＾**|键盘SHIFT+6|
-
-### 快速测试
-
-```bash
-docker run --rm -ti \
- -p 10086:10086 zctmdc/n2n_ntop:Beta \
- supernode -l 10086 -v
-```
-
-### 建立 *supernode*
+#指定supernode允许分配的IP地址范围
+docker run --name supernode01v3 --restart=always -it -d -p 10087:10087/udp registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n:v3 \
+supernode -p 10087 \
+-a 10.0.20.0-10.0.25.0/24 -F myn2nv3 -f
 
 
-```bash
-docker run \
-  -d --restart=always \
-  --name=supernode \
-  -e MODE="SUPERNODE" \
-  -e SUPERNODE_PORT=10086 \
-  -p 10086:10086/udp \
-  zctmdc/n2n_ntop:Beta
-```
-
-### 建立 *edge*
-
-```bash
-docker run \
-  -d --restart=always \
-  --name n2n_edge \
-  --privileged \
-  --net=host \
-  -e MODE="STATIC" \
-  -e EDGE_IP="10.10.10.10" \
-  -e EDGE_COMMUNITY="n2n" \
-  -e EDGE_KEY="test" \
-  -e SUPERNODE_HOST=n2n.lucktu.com \
-  -e SUPERNODE_PORT=10086 \
-  -e EDGE_ENCRYPTION=A3 \
-  -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Beta
-```
-
-## 更多模式
+#supernode也可以不指定分配的IP范围
+docker run  --name supernode01v3 --restart=always -it -d -p 10087:10087/udp  registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n:v3 \
+supernode -p 10087 \
+ -F myn2nv3 -f
 
 
 
-### DHCPD - DHCP服务端模式
-
-```bash
-docker run \
-  -d --restart=always \
-  --name n2n_edge \
-  --privileged \
-  --net=host \
-  -e MODE="DHCPD" \
-  -e EDGE_IP="10.10.10.1" \
-  -e EDGE_COMMUNITY="n2n" \
-  -e EDGE_KEY="test" \
-  -e SUPERNODE_HOST=n2n.lucktu.com \
-  -e SUPERNODE_PORT=10086 \
-  -e EDGE_ENCRYPTION=A3 \
-  -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Beta
-```
+#edge 自动从supernode允许分配的IP范围中获取IP地址
+docker run --name edge01v3 --restart=always -it -d --privileged --net=host registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n:v3 \
+edge -l 1xx2:10087 \
+-c mxxxxxxy_v3 \
+-k mxxxxxxxy \
+-A2 \
+-a DHCP:0.0.0.0 \
+-d edge01v3 \
+-r \
+-e auto -f
 
 
-如果你需要自定义DHCPD服务配置文件
 
- ```bash
- -v path/to/dhcpd.conf:/etc/dhcp/dhcpd.conf:ro \
- ```
-
-### DHCP - DHCP动态IP模式
-
-```bash
-docker run \
-  -d --restart=always \
-  --name n2n_edge \
-  --privileged \
-  --net=host \
-  -e MODE="DHCP" \
-  -e EDGE_COMMUNITY="n2n" \
-  -e EDGE_KEY="test" \
-  -e SUPERNODE_HOST=n2n.lucktu.com \
-  -e SUPERNODE_PORT=10086 \
-  -e EDGE_ENCRYPTION=A3 \
-  -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Beta
-```
-
-
-### STATIC - 静态IP模式
-
-```bash
-docker run \
-  -d --restart=always \
-  --name n2n_edge \
-  --privileged \
-  --net=host \
-  -e MODE="STATIC" \
-  -e EDGE_IP="10.10.10.10" \
-  -e EDGE_COMMUNITY="n2n" \
-  -e EDGE_KEY="test" \
-  -e SUPERNODE_HOST=n2n.lucktu.com \
-  -e SUPERNODE_PORT=10086 \
-  -e EDGE_ENCRYPTION=A3 \
-  -e N2N_ARGS="-f" \
-  zctmdc/n2n_ntop:Beta
-```
-
-
-## 环境变量介绍
-
-|变量名|变量说明|备注|对应参数|
-|---:|:---|:---|:---|
-|MODE|模式|对应启动的模式| *`SUPERNODE`* *`DHCPD`*  *`DHCP`* *`STATIC`* |
-|SUPERNODE_PORT|超级节点端口|在SUPERNODE/EDGE中使用|-l $SUPERNODE_PORT|
-|SUPERNODE_HOST|要连接的N2N超级节点|IP/HOST|-l $SUPERNODE_HOST:$SUPERNODE_PORT|
-|EDGE_IP|静态IP|在静态模式和DHCPD使用|-a $EDGE_IP|
-|EDGE_COMMUNITY|组网名称|在EDGE中使用|-c $EDGE_COMMUNITY|
-|EDGE_KEY|组网密码|在EDGE中使用|-k $EDGE_KEY|
-|EDGE_ENCRYPTION|加密方式|edge间连接加密方式|-A2 = Twofish (default), -A3 or -A (deprecated) = AES-CBC, -A4 = ChaCha20, -A5 = Speck-CTR.|
-|EDGE_TUN|网卡名|edge使用的网卡名|-d $EDGE_TUN|
-|N2N_ARGS|更多参数|运行时附加的更多参数|-v -f|
+#edge 自动从supernode允许分配的IP范围中获取IP地址
+docker run  --name edge01v3 --restart=always -it -d --privileged --net=host registry.cn-hangzhou.aliyuncs.com/sourcegarden/n2n:v3 \
+edge -l xxxxx2:10087 \
+-c xxxxxx \
+-k xxxxxx \
+-A2 \
+-a 10.0.20.20 \
+-d edge01v3 \
+-r \
+-e auto -f
 
 更多帮助请参考 [好运博客][好运博客] 中 [N2N 新手向导及最新信息][N2N 新手向导及最新信息]
 
