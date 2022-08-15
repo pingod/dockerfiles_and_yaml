@@ -10,7 +10,7 @@ ENV EKS_CLUSTER_PREFIX "PositecEksDev"
 ENV ECR_STR "680218613974.dkr.ecr.us-east-1.amazonaws.com"
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk add aws-cli --no-cache \
+    && apk add aws-cli bash --no-cache \
     && wget https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kubectl \
     && chmod +x kubectl \
     && mv kubectl /usr/local/bin/
