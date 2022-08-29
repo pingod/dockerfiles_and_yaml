@@ -1,0 +1,51 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: tail-0
+  namespace: kubesphere-system
+  labels:
+    app: tail-0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tail-0
+  template:
+    metadata:
+      labels:
+        app: tail-0
+    spec:
+      volumes:
+        - name: tun
+          hostPath:
+            path: /dev/net/tun
+            type: ''
+        - name: lib
+          hostPath:
+            path: /var/lib
+            type: ''
+      containers:
+        - name: tail-0
+          image: tailscale/tailscale
+          command:
+            - sh
+            - '-c'
+          args:
+            - >-
+              tailscaled && sleep 3  && tailscale up
+              --login-server=http://123.57.3.122:8080 --accept-routes=true
+              --accept-dns=true  --authkey $KEY
+          env:
+            - name: KEY
+              value: ff0ece6540b04aee520774a12513b599e52b00f210df8976
+          volumeMounts:
+            - name: tun
+              mountPath: /dev/net/tun
+            - name: lib
+              mountPath: /var/lib
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
