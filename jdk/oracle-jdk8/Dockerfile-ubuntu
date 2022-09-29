@@ -1,0 +1,11 @@
+FROM ubuntu:20.04
+
+RUN apt-get update && apt-get install -y bsdiff && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ADD jdk-8u201-linux-x64.tar.gz /usr/local/
+
+ENV JAVA_HOME=/usr/local/jdk1.8.0_333
+ENV CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+CMD ["java","-version"]

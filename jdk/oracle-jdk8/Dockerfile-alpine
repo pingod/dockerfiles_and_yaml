@@ -1,0 +1,29 @@
+# This is a JDK servic docker
+FROM alpine:3.11
+RUN echo http://mirrors.aliyun.com/alpine/v3.11/main/ > /etc/apk/repositories && \
+    echo http://mirrors.aliyun.com/alpine/v3.11/community/ >> /etc/apk/repositories
+RUN apk update && apk upgrade
+
+RUN apk add tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && apk del tzdata
+
+#******************Alpine安装 Glibc https://github.com/sgerrand/alpine-pkg-glibc *****************
+WORKDIR /usr/local/jdk
+
+ADD  jdk-8u333-linux-x64.tar.gz /usr/local/jdk/
+COPY glibc-2.35-r0.apk /usr/local/jdk/
+
+#5.运行指定的命令
+# ca-certificates证书服务，是安装glibc前置依赖
+RUN apk --no-cache add ca-certificates wget \
+    && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+    && apk add glibc-2.35-r0.apk  \
+    && rm -rf /var/cache/apk/* glibc-2.35-r0.apk
+
+
+#******************设置JAVA变量环境******************
+#6.配置环境变量
+ENV JAVA_HOME=/usr/local/jdk/jdk1.8.0_333
+ENV CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH=$JAVA_HOME/bin:$PATH
