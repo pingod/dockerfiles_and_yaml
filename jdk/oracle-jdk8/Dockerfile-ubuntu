@@ -3,6 +3,9 @@ FROM ubuntu:20.04
 RUN apt-get update && apt-get install -y bsdiff && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ADD jdk-8u333-linux-x64.tar.gz /usr/local/
+#启用JDK对赛门铁克的证书认证
+RUN sed -i.bak 's/jdk.security.caDistrustPolicies=SYMANTEC_TLS/#jdk.security.caDistrustPolicies=SYMANTEC_TLS/g' /usr/local/jdk1.8.0_333/jre/lib/security/java.security
+
 
 ENV JAVA_HOME=/usr/local/jdk1.8.0_333
 ENV CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
