@@ -51,10 +51,11 @@ COPY --from=builder /usr/local/bin/eksctl  /usr/local/bin/
 COPY --from=builder /usr/local/bin/helm  /usr/local/bin/
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk add curl nano bash gettext libqrencode zip git unzip  --no-cache \
+    && apk add curl nano bash gettext libqrencode zip git unzip jq tmux bash-completion  --no-cache \
     && wget https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl \
     && chmod +x kubectl \
     && mv kubectl /usr/local/bin/ \
+    && source <(kubectl completion bash) \
     && helm repo add eks https://aws.github.io/eks-charts \
     && helm repo update
 
