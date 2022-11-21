@@ -49,6 +49,8 @@ COPY --from=builder /usr/local/aws-cli/ /usr/local/aws-cli/
 COPY --from=builder /aws-cli-bin/ /usr/local/bin/
 COPY --from=builder /usr/local/bin/eksctl  /usr/local/bin/
 COPY --from=builder /usr/local/bin/helm  /usr/local/bin/
+COPY .tmux.conf ~/
+
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
     && apk add curl nano bash gettext libqrencode zip git unzip jq tmux bash-completion  --no-cache \
