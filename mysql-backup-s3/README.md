@@ -23,12 +23,7 @@ $ docker run -e S3_ACCESS_KEY_ID=key -e S3_SECRET_ACCESS_KEY=secret -e S3_BUCKET
 - `S3_FILENAME` a consistent filename to overwrite with your backup.  If not set will use a timestamp.
 - `S3_REGION` the AWS S3 bucket region (default: us-west-1)
 - `S3_ENDPOINT` the AWS Endpoint URL, for S3 Compliant APIs such as [minio](https://minio.io) (default: none)
+- `S3_ENSURE_BUCKET_EXISTS` set to `no` to assume the bucket exists, avoiding the need of S3 read permissions (default: yes)
 - `S3_S3V4` set to `yes` to enable AWS Signature Version 4, required for [minio](https://minio.io) servers (default: no)
 - `MULTI_FILES` Allow to have one file per database if set `yes` default: no)
-- `SCHEDULE` backup schedule time, see explainatons below
-
-### Automatic Periodic Backups
-
-You can additionally set the `SCHEDULE` environment variable like `-e SCHEDULE="@daily"` to run the backup automatically.
-
-More information about the scheduling can be found [here](http://godoc.org/github.com/robfig/cron#hdr-Predefined_schedules).
+- `SCHEDULE` backup schedule time in [cron format](https://crontab.guru) like `7 2,14 * * *`
