@@ -33,6 +33,19 @@ RUN wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && rm -fr helm-v${HELM_VERSION}-linux-amd64.tar.gz
 
 
+ARG K9S_VERSION=0.26.7
+RUN wget https://github.com/derailed/k9s/releases/download/v${K9S_VERSION}/k9s_Linux_x86_64.tar.gz \
+    && tar xvf k9s_Linux_x86_64.tar.gz \
+    && mv k9s /usr/local/bin \
+    && chmod +x /usr/local/bin/k9s \
+    && rm -fr k9s_Linux_x86_64.tar.gz
+
+
+ARG KUBECTL_VERSION=1.22.0
+RUN wget https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
+    && chmod +x kubectl \
+    && mv kubectl /usr/local/bin/ 
+
 FROM docker:20-dind
 
 ENV AWS_ACCESS_KEY_ID ${AWS_ACCESS_KEY_ID}
@@ -49,17 +62,15 @@ COPY --from=builder /usr/local/aws-cli/ /usr/local/aws-cli/
 COPY --from=builder /aws-cli-bin/ /usr/local/bin/
 COPY --from=builder /usr/local/bin/eksctl  /usr/local/bin/
 COPY --from=builder /usr/local/bin/helm  /usr/local/bin/
+COPY --from=builder /usr/local/bin/k9s  /usr/local/bin/
+COPY --from=builder /usr/local/bin/kubectl  /usr/local/bin/
 COPY .tmux.conf ~/
 
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
     && apk add curl nano bash gettext libqrencode zip git unzip jq tmux bash-completion  --no-cache \
-    && wget https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl \
-    && chmod +x kubectl \
-    && mv kubectl /usr/local/bin/ \
-    && source <(kubectl completion bash) \
+    && echo 'source <(kubectl completion bash)' >> /root/.bashrc \
     && helm repo add eks https://aws.github.io/eks-charts \
     && helm repo update
 
 CMD ["sh"]
-
