@@ -8,7 +8,7 @@ This chart bootstraps an apisix-ingress-controller deployment on a [Kubernetes](
 
 ## Prerequisites
 
-Apisix ingress controller requires Kubernetes version 1.14+.
+Apisix ingress controller requires Kubernetes version 1.16+.
 
 ## Get Repo Info
 
@@ -56,6 +56,10 @@ See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_h
 ```console
 helm show values apisix/apisix-ingress-controller
 ```
+
+### Pod priority
+
+`priorityClassName` field referenced a name of a created `PriorityClass` object. Check [here](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption) for more details.
 
 ### Security context
 

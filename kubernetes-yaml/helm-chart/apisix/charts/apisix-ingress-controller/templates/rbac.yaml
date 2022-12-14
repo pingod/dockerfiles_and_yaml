@@ -25,34 +25,15 @@ rules:
     resources:
       - events
     verbs:
-      - '*'
+      - "*"
   - apiGroups:
       - ""
     resources:
       - configmaps
       - endpoints
-      - persistentvolumeclaims
       - pods
-      - replicationcontrollers
-      - replicationcontrollers/scale
-      - serviceaccounts
       - services
       - secrets
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - bindings
-      - limitranges
-      - namespaces/status
-      - pods/log
-      - pods/status
-      - replicationcontrollers/status
-      - resourcequotas
-      - resourcequotas/status
     verbs:
       - get
       - list
@@ -66,33 +47,9 @@ rules:
       - list
       - watch
   - apiGroups:
-      - apps
+      - extensions
     resources:
-      - controllerrevisions
-      - daemonsets
-      - deployments
-      - deployments/scale
-      - replicasets
-      - replicasets/scale
-      - statefulsets
-      - statefulsets/scale
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - autoscaling
-    resources:
-      - horizontalpodautoscalers
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - batch
-    resources:
-      - cronjobs
-      - jobs
+      - ingresses
     verbs:
       - get
       - list
@@ -100,20 +57,13 @@ rules:
   - apiGroups:
       - extensions
     resources:
-      - daemonsets
-      - deployments
-      - deployments/scale
-      - ingresses
-      - networkpolicies
-      - replicasets
-      - replicasets/scale
-      - replicationcontrollers/scale
+      - ingresses/status
     verbs:
-      - '*'
+      - update
   - apiGroups:
-      - policy
+      - networking.k8s.io
     resources:
-      - poddisruptionbudgets
+      - ingresses
     verbs:
       - get
       - list
@@ -121,19 +71,9 @@ rules:
   - apiGroups:
       - networking.k8s.io
     resources:
-      - ingresses
       - ingresses/status
-      - networkpolicies
     verbs:
-      - '*'
-  - apiGroups:
-      - metrics.k8s.io
-    resources:
-      - pods
-    verbs:
-      - get
-      - list
-      - watch
+      - update
   - apiGroups:
       - apisix.apache.org
     resources:
@@ -165,6 +105,26 @@ rules:
       - get
       - list
       - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+      - tlsroutes
+      - gateways
+      - gatewayclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes/status
+      - tlsroutes/status
+      - gateways/status
+      - gatewayclasses/status
+    verbs:
+      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -682,7 +682,7 @@ networkPolicy:
 metrics:
   ## @param metrics.enabled Expose etcd metrics
   ##
-  enabled: true
+  enabled: false
   ## @param metrics.podAnnotations [object] Annotations for the Prometheus metrics on etcd pods
   ##
   podAnnotations:
