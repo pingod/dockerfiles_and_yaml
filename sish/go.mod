@@ -7,7 +7,7 @@ require (
 	github.com/caddyserver/certmagic v0.11.2
 	github.com/cenkalti/backoff/v4 v4.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/gin-gonic/gin v1.7.0
+	github.com/gin-gonic/gin v1.7.7
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jpillora/ipfilter v1.2.1
