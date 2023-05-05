@@ -7,11 +7,9 @@ require (
 	github.com/caddyserver/certmagic v0.11.2
 	github.com/cenkalti/backoff/v4 v4.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/gin-gonic/gin v1.7.0
-	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/gin-gonic/gin v1.9.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/jpillora/ipfilter v1.2.1
-	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/klauspost/cpuid v1.3.0 // indirect
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
 	github.com/mailgun/timetools v0.0.0-20170619190023-f3a7b8ffff47 // indirect
@@ -27,10 +25,8 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
-	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
-	google.golang.org/protobuf v1.24.0 // indirect
+	github.com/ugorji/go v1.1.7 // indirect
+	golang.org/x/crypto v0.5.0
 	gopkg.in/ini.v1 v1.57.0 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
