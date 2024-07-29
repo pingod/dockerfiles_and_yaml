@@ -18,14 +18,14 @@ RUN /aws-cli-bin/aws --version
 RUN rm -rf /usr/local/aws-cli/v2/current/dist/aws_completer /usr/local/aws-cli/v2/current/dist/awscli/data/ac.index /usr/local/aws-cli/v2/current/dist/awscli/examples
 RUN find /usr/local/aws-cli/v2/current/dist/awscli/botocore/data -name examples-1.json -delete
 
-ARG EKSCTL_VERSION=0.118.0
+ARG EKSCTL_VERSION=0.187.0
 RUN wget https://github.com/weaveworks/eksctl/releases/download/v${EKSCTL_VERSION}/eksctl_Linux_amd64.tar.gz \
     && tar xvf eksctl_Linux_amd64.tar.gz \
     && mv eksctl /usr/local/bin \
     && chmod +x /usr/local/bin/eksctl \
     && rm -fr eksctl_Linux_amd64.tar.gz
 
-ARG HELM_VERSION=3.10.2
+ARG HELM_VERSION=3.15.3
 RUN wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar xvf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin \
@@ -33,7 +33,7 @@ RUN wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && rm -fr helm-v${HELM_VERSION}-linux-amd64.tar.gz
 
 
-ARG K9S_VERSION=0.26.7
+ARG K9S_VERSION=0.32.5
 RUN wget https://github.com/derailed/k9s/releases/download/v${K9S_VERSION}/k9s_Linux_x86_64.tar.gz \
     && tar xvf k9s_Linux_x86_64.tar.gz \
     && mv k9s /usr/local/bin \
@@ -41,12 +41,12 @@ RUN wget https://github.com/derailed/k9s/releases/download/v${K9S_VERSION}/k9s_L
     && rm -fr k9s_Linux_x86_64.tar.gz
 
 
-ARG KUBECTL_VERSION=1.22.0
+ARG KUBECTL_VERSION=1.30.0
 RUN wget https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
     && chmod +x kubectl \
     && mv kubectl /usr/local/bin/ 
 
-FROM docker:20-dind
+FROM docker:27-dind
 
 ENV AWS_ACCESS_KEY_ID ${AWS_ACCESS_KEY_ID}
 ENV AWS_SECRET_ACCESS_KEY ${AWS_SECRET_ACCESS_KEY}
