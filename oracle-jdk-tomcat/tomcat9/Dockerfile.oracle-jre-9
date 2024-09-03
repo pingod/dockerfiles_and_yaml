@@ -1,7 +1,7 @@
 FROM registry.cn-hangzhou.aliyuncs.com/sourcegarden/jdk:oracle-jre-9
 
 ENV TOMCAT_MAJOR=9 \
-    TOMCAT_VERSION=9.0.13 \
+    TOMCAT_VERSION=9.0.93 \
     TOMCAT_HOME=/opt/tomcat \
     CATALINA_HOME=/opt/tomcat \
     CATALINA_OUT=/dev/null
