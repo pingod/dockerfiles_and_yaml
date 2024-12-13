@@ -1,0 +1,172 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ofss-config-env
+  namespace: kube-system
+data:
+  hostname_in_docker: xuchang-k8s-k8s-55
+  ip_out_docker: 172.16.0.11
+  server_addr: 123.57.3.2
+  ssh_port_out_docker: '22'
+#下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
+  OPENVPN: /etc/openvpn
+  EASYRSA_PKI: '/etc/openvpn/pki'
+  EASYRSA_VARS_FILE: '/etc/openvpn/vars'
+  EASYRSA: /usr/share/easy-rsa
+  EASYRSA_CRL_DAYS: '3650'
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ofss-config-frpc
+  namespace: kube-system
+data:
+  frpc-lite.ini: |-
+    [common]
+    server_addr = 123.57.3.2
+    server_port = 71002
+    log_file = console
+    log_level = info
+    log_max_days = 3
+    token = 40552022
+    admin_addr = 127.0.0.1
+    admin_port = 7400
+    admin_user = admin
+    admin_pwd = admin
+    pool_count = 5
+    tcp_mux = true
+    login_fail_exit = true
+    protocol = tcp
+
+    [range:sshindocker hostname_in_docker]
+    type = tcp
+    local_ip = 127.0.0.1
+    local_port = 22
+    remote_port = 0
+    use_encryption = true
+    use_compression = true
+
+    [range:sshoutdocker hostname_in_docker]
+    type = tcp
+    local_ip = ip_out_docker
+    local_port = ssh_port_out_docker
+    remote_port = 0
+    use_encryption = false
+    use_compression = false
+
+
+    [range:tovn hostname_in_docker]
+    type = tcp
+    local_ip = 127.0.0.1
+    local_port = 1447
+    remote_port = 0
+    use_encryption = false
+    use_compression = false
+
+    [range:uovn hostname_in_docker]
+    type = udp
+    local_ip = 127.0.0.1
+    local_port = 1194
+    remote_port = 0
+    use_encryption = false
+    use_compression = false
+
+    [range:squid hostname_in_docker]
+    type = tcp
+    local_ip = 127.0.0.1
+    local_port = 3128
+    remote_port = 0
+    use_encryption = true
+    use_compression = false
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ofss
+  namespace: kube-system
+  labels:
+    app: ofss
+spec:
+  selector:
+    matchLabels:
+      app: ofss
+  template:
+    metadata:
+      name: ofss
+      labels:
+        app: ofss
+    spec:
+      containers:
+        - name: ofss
+          image: 'registry.cn-hangzhou.aliyuncs.com/sourcegarden/openvpn-fss:v0.7'
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: ofss-config-env
+          resources:
+            limits:
+              cpu: 500m
+              memory: '500Mi'
+            requests:
+              cpu: '0'
+              memory: '500Mi'
+          volumeMounts:
+            # - name: ofss-config-frp-nouse
+            #   mountPath: /etc/frp-nouse/
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+            - name: hostpath-time
+              mountPath: /etc/localtime
+            - name: hostpath-openvpn
+              mountPath: /etc/openvpn
+            - name: hostpath-frpc
+              mountPath: /etc/frp
+            - name: hostpath-ssh
+              mountPath: /root/.ssh
+          securityContext:
+            privileged: true
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: ''
+        - name: hostpath-time
+          hostPath:
+            path: /etc/localtime
+            type: ''
+        - name: hostpath-openvpn
+          hostPath:
+            path: /data/tools/ofss/openvpn
+            type: ''
+        - name: hostpath-frpc
+          hostPath:
+            path: /data/tools/ofss/frpc
+            type: ''
+        - name: hostpath-ssh
+          hostPath:
+            path: /root/.ssh/
+            type: ''
+        # - name: ofss-config-frp-nouse
+        #   configMap:
+        #     name: ofss-config-frpc
+            #defaultMode: 420
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      # nodeSelector:
+      #   kubernetes.io/hostname: ds02
+      # tolerations:
+      #  - key: node-role.kubernetes.io/master
+      #    operator: Exists
+      #    effect: NoSchedule
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #         - matchExpressions:
+      #             - key: kubernetes.io/hostname
+      #               operator: In
+      #               values:
+      #                 - master

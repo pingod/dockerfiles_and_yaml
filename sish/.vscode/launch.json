@@ -1,0 +1,38 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}",
+      "env": {},
+      "args": [
+        "--debug=true",
+        "--http-address=:8081",
+        "--ssh-address=:2222",
+        "--domain=testing.ssi.sh",
+        "--bind-random-subdomains=false",
+        "--bind-random-ports=false",
+        "--bind-random-aliases=false",
+        "--https=false",
+        "--authentication=false",
+        "--tcp-aliases=true",
+        "--proxy-protocol=true",
+        "--proxy-protocol-listener=true",
+        "--proxy-protocol-use-timeout=true",
+        "--log-to-client=true",
+        "--admin-console=true",
+        "--service-console=true",
+        "--verify-ssl=false",
+        "--http-load-balancer=true",
+        "--tcp-load-balancer=true",
+        "--alias-load-balancer=true"
+      ]
+    }
+  ]
+}

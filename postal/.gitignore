@@ -1,0 +1,7 @@
+alpine/data/*
+!alpine/data/.gitkeep
+!alpine/data/postal/.gitkeep
+ubuntu/data/*
+!ubuntu/data/.gitkeep
+!ubuntu/data/postal/.gitkeep
+

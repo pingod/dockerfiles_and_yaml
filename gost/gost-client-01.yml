@@ -1,0 +1,14 @@
+version: "3"
+services:
+  awshk-self-wg:
+    image: ginuerzh/gost:2.11.2
+    restart: always
+    network_mode: "host"
+    command:
+      - "-L=tcp://:11237"
+      - "-L=udp://:11237"
+      - "-F=relay+tls://18.162.113.77:11236?mbind=true"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

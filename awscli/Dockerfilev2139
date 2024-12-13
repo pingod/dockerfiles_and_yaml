@@ -1,0 +1,26 @@
+FROM docker:20-dind
+
+ENV AWS_ACCESS_KEY_ID ${AWS_ACCESS_KEY_ID}
+ENV AWS_SECRET_ACCESS_KEY ${AWS_SECRET_ACCESS_KEY}
+ENV AWS_DEFAULT_REGION ${AWS_DEFAULT_REGION}
+ENV AWS_REGION ${AWS_REGION}
+ENV DOCKER_HOST tcp://docker:2375
+ENV DOCKER_DRIVER overlay2
+ENV VERSION v1
+ENV EKS_CLUSTER_PREFIX "PositecEksDev"
+ENV ECR_STR "680218613974.dkr.ecr.us-east-1.amazonaws.com"
+
+ENV AWS_CLI_VERSION=2.1.39
+
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk add bash curl gcompat zip --no-cache \
+    && curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip -o awscliv2.zip  \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -fr aws awscliv2.zip \
+    && wget https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kubectl \
+    && chmod +x kubectl \
+    && mv kubectl /usr/local/bin/
+
+CMD ["sh"]
+

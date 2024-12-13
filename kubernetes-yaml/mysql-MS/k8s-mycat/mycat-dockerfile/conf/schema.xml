@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+
+	<schema name="${DB_NAME}" checkSQLschema="false" sqlMaxLimit="100" dataNode="k8s-mysql-dev01">
+	</schema>
+	<dataNode name="k8s-mysql-dev01" dataHost="mysql-ha-on-k8s" database="${DB_NAME}" />
+	<dataHost name="mysql-ha-on-k8s" maxCon="1000" minCon="10" balance="3" writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="mysql-master-dev-01" url="${MYSQL_MASTER_SERVICE_HOST}:3306" user="${MYSQL_USER}" password="${MYSQL_PASSWORD}">
+		<readHost  host="mysql-slave-dev-01" url="${MYSQL_SLAVE_SERVICE_HOST}:3306"  user="${MYSQL_USER}" password="${MYSQL_PASSWORD}"/>
+		</writeHost>
+	</dataHost>
+</mycat:schema>

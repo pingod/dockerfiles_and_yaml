@@ -1,0 +1,16 @@
+FROM alpine:edge
+
+RUN apk --no-cache add -X https://mirrors.nju.edu.cn/alpine/edge/community \
+  mongodb-tools \
+  mysql-client \
+  postgresql-client \
+  bash \
+  nano
+
+COPY ./device-info.sh /tmp
+WORKDIR /tmp
+RUN chmod +x ./device-info.sh
+
+
+#CMD  ["./device-info.sh"]
+ENTRYPOINT  ["./device-info.sh"]

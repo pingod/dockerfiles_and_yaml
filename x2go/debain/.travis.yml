@@ -1,0 +1,20 @@
+sudo: required 
+language: cpp
+services:
+  - docker
+env:
+  global:
+    - secure:  "Qt/MEtDPh4Tn03B++H1EXY8C4+UNOLPS2BHCAqL7cqlrGEAu/PBFADFBC/9F3WcMTBv1mVwWsOigEZJDqh8PRuTAUwF9Kdk4i4POzPIxngVGeHt4aPFhzT7uToyBJfBczQMR9yki1MPXBmvyEX39qz4iV/wyc3FqYi03dJnoIPSiG+qBiSorKw4A7eUU/dyiDua0G//NJmkYAMR6gafipbd+hsgG7uxOB1Ij2SRNnv+gUVGaAhX36ijoOtAc/V+40fNUnR+9vbNuCeJYEYM0a5F+x8qkSGBpG+qkBj6EzTnKXHdv7Y3KZY0EKolavbsjdH4Ff8Zx7hgLOR8dgicOBDgQTtdGiygVX8g5EzeiTZZzoSpYNCsrMO3lGycuaWxR+DsiLLZcibUuiZl3YaTWj0BWDzb2kn2WXShis65ZhMIEUjiqqu1f7ZsydJI/YC50G6BWtIZC7fwoedwJTQj0P7gDn67p9FJYAP69/tFYeK4N16wXX+Cuy8sCvFvXfwPUYug5dckMe7cEPcXctzBx/DTFs5oVHUj46qI/wSm5WxCnMgu8uXuwSlOI+veaQ9JEvThTrD9p9Lltgjr4pDpuE+Yr/ZTSEhlsnx58dWkybRluWQjJprxI8OFvHSBpqR7CHO41wn53wN3k5tuWR7p4P65vKn7ak1zA5zZ/NnO+Yt4=" # DOCKER_USER
+    - secure: "t2Gqsq4Q1sBxDjUOPFqMEC7LPs2tpdsqvX0NEQe5HXvnd0QZ7MuDudzKSEGRwqTfXfFbAclYS7ioUOgLj/RMochszib0BscYuYAXMqZ1BidmcENPiXYekAJFy7MaxpsFxGaWbouXStQKTQhYK/HCdO+JHoqtBn7tZaKCPO6eO+Azl3jdYvKFzDKZBIld4ukanc8GPiD+pYNeuJEURyCXXGBcQQ4i3oKVRF1EftRVvOmmqoFTil94gIgYrAteTsP5SN7uGDlkopbvDg41zm91+mRtTGINj8wzkvYkqiSnos3dYoyNZdEd7mFc95LXoq8X02N8IdTVAomEhiBC9LMY8qAV+YECiq+E6UWm0ZSO2sgUHxCPwgpgRXhVr57ZzRHBDGkckqgdSwdk+PZ6iKqCGUEETY9vwJMVhthhcNXiKQuAZowYP2WqCfi1Qcd9I6MT7wHQ9NTrZs8tiBCiuq2n0bBxNswdmUhB4K8c3aZ2mhm0XCDOzBRaTCl4VmNkNfTSPgy+yXnhRFtPeL1rZBdS15NYDHK+eK93A8JG0E5Kx5jiXhp60CvsGBNm1Ac0r5JVx2XkrsZd5sDkK7zKztQnEx3OsunhtuSkTV3rjrmPoZUSz1Op9xW45b/npZ/E6ib6RMMwyu9Ae4u8a0sZXGbW5wHqvxHFnPBpZb7cHJILJvg=" # DOCKER_PASS
+    - COMMIT=${TRAVIS_COMMIT::8}
+before_install:
+  - sudo git clone https://github.com/spielhuus/docker-x2go.git /repo
+
+script:
+  - cd /repo
+  - sudo docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - export REPO=spielhuus/x2go
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+  - sudo docker build -f Dockerfile -t $REPO:$TAG .
+  - sudo docker push $REPO
+

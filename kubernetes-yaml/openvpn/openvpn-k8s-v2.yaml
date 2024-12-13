@@ -1,0 +1,89 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: open-config-env
+data:
+# 由于基础镜像原因，必须要一个此变量
+  server_addr: bbs.itaojin.me
+#下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
+  OPENVPN: /etc/openvpn
+  EASYRSA_PKI: '/etc/openvpn/pki'
+  EASYRSA_VARS_FILE: '/etc/openvpn/vars'
+  EASYRSA: /usr/share/easy-rsa
+  EASYRSA_CRL_DAYS: '3650'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "6"
+  labels:
+    app: forbusiness
+  name: open
+spec:
+  selector:
+    matchLabels:
+      app: forbusiness
+  template:
+    metadata:
+      labels:
+        app: forbusiness
+      name: open
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - vm10-30-0-46
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Exists"
+          value: ""
+          effect: "NoSchedule"
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: open-config-env
+        image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/openvpn:alpine-v1.0
+        imagePullPolicy: Always
+        name: open
+        resources:
+          limits:
+            cpu: 200m
+            memory: "209715200"
+          requests:
+            cpu: "0"
+            memory: "209715200"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/openvpn
+          name: hostpath-open
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      volumes:
+      - hostPath:
+          path: /data/tools/openvpn/
+          type: ""
+        name: hostpath-open
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: forbusiness
+  name: open
+spec:
+  ports:
+  - nodePort: 18868
+    port: 1194
+    protocol: TCP
+    targetPort: 1194
+  selector:
+    app: forbusiness
+  sessionAffinity: None
+  type: NodePort

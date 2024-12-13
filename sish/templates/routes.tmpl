@@ -1,0 +1,132 @@
+{{ define "routes" }}
+{{ template "header" .}}
+<div class="row">
+    <div class="col table-responsive">
+        <h2>Clients</h2>
+        <table id="client-table" class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Client Remote Address</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">SSH Version</th>
+                    <th scope="col">SSH Session ID</th>
+                    <th scope="col">SSH Pubkey Fingerprint</th>
+                    <th scope="col">Listeners</th>
+                    <th scope="col">Disconnect</th>
+                </tr>
+            </thead>
+            <tbody id="client-list" data-bind="foreach: clients">
+                <tr class="client-row" data-bind="click: showRoutes, css: {'table-active' : active}">
+                    <th scope="row" data-bind="text: remoteAddr"></th>
+                    <td data-bind="text: user"></td>
+                    <td data-bind="text: version"></td>
+                    <td data-bind="text: session"></td>
+                    <td data-bind="text: pubKeyFingerprint"></td>
+                    <td data-bind="text: listeners.length"></td>
+                    <td><a style="text-transform: none; color: white;" class="btn btn-danger" data-bind="click: disconnectClient">Disconnect</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col table-responsive">
+        <h2>Routes</h2>
+        <table id="route-table" class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">File Address</th>
+                    <th scope="col">Client Remote Address</th>
+                    <th scope="col">Disconnect</th>
+                </tr>
+            </thead>
+            <tbody id="route-list" data-bind="foreach: routes">
+                <tr>
+                    <th scope="row" data-bind="text: type"></th>
+                    <td>
+                        <span data-bind="if: type == 'HTTP'"><a style="text-transform: none; color: white;" class="btn btn-primary" data-bind="click: forwardToConsole, text: name"></a></span>
+                        <span data-bind="ifnot: type == 'HTTP'"><span data-bind="text: name"></span></span>
+                    </td>
+                    <td data-bind="text: data"></td>
+                    <td data-bind="text: clientData.remoteAddr"></td>
+                    <td><a style="text-transform: none; color: white;" class="btn btn-danger" data-bind="click: disconnectRoute">Disconnect</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var clients = {
+        clients: ko.observableArray([]),
+        routes: ko.observableArray([])
+    };
+
+    var Route = function(clientData, routeType, routeName, routeData, disconnectType) {
+        this.clientData = clientData;
+        this.data = routeData;
+        this.type = routeType;
+        this.name = routeName;
+        this.disconnectType = disconnectType;
+
+        this.disconnectRoute = function() {
+            $.get(window.location.href.replace("console", `api/disconnectroute/${this.disconnectType}/${btoa(this.data)}`), function(data) {
+                window.location.reload();
+            });
+        }.bind(this);
+
+        this.forwardToConsole = function() {
+            window.location.hostname = this.name;
+        }.bind(this);
+    };
+
+    var Client = function(clientData) {
+        this.data = clientData;
+
+        this.pubKeyFingerprint = clientData.pubKeyFingerprint;
+        this.remoteAddr = clientData.remoteAddr;
+        this.user =clientData.user;
+        this.version = clientData.version;
+        this.session = clientData.session;
+        this.listeners = clientData.listeners;
+
+        this.active = ko.observable(false);
+
+        this.disconnectClient = function() {
+            $.get(window.location.href.replace("console", `api/disconnectclient/${this.remoteAddr}`), function(data) {
+                window.location.reload();
+            });
+        }.bind(this);
+
+        this.showRoutes = function() {
+            clients.routes.removeAll();
+
+            for (var client of clients.clients()) {
+                client.active(false);
+            }
+
+            this.active(true);
+
+            var routeTypes = {HTTP: ["httpListeners", "httplistener"], TCPAlias: ["tcpAliases", "tcpalias"], NET: ["listeners", "listener"]};
+            for (var routeType in routeTypes) {
+                for (var route in this.data.routeListeners[routeTypes[routeType][0]]) {
+                    clients.routes.push(new Route(this.data, routeType, route, this.data.routeListeners[routeTypes[routeType][0]][route], routeTypes[routeType][1]));
+                }
+            }
+        }.bind(this);
+    };
+
+    $(function() {
+        $.getJSON(window.location.href.replace("console", "api/clients"), function(data) {
+            for (var client in data.clients) {
+                clients.clients.push(new Client(data.clients[client]));
+            }
+
+            ko.applyBindings(clients);
+        });
+    });
+</script>
+{{ template "footer" .}}
+{{ end }}

@@ -1,0 +1,1 @@
+registry.cn-hangzhou.aliyuncs.com/sourcegarden/frpc:alpine-v1.0

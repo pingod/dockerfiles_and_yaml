@@ -1,0 +1,16 @@
+/.dockerignore
+/Dockerfile
+/Dockerfile.buildkit
+/.git/
+/.github/
+/.gitignore
+/.goreleaser.yml
+/deploy/
+!/deploy/ssl/.gitkeep
+!/deploy/keys/.gitkeep
+!/deploy/pubkeys/.gitkeep
+/dist/
+/sish
+/.vscode/
+/__debug_bin
+/.DS_Store

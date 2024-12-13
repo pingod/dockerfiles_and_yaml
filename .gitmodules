@@ -1,0 +1,15 @@
+[submodule "nginx/verynginx"]
+	path = nginx/verynginx
+	url = git@github.com:pingod/VeryNginx.git
+[submodule "nginx/openrestry"]
+	path = nginx/openrestry
+	url = git@github.com:pingod/docker-openresty.git
+[submodule "nsenter"]
+	path = nsenter
+	url = git@github.com:pingod/nsenter.git
+[submodule "docker-openvpn"]
+	path = docker-openvpn
+	url = git@github.com:pingod/docker-openvpn.git
+[submodule "frpc"]
+	path = frpc
+	url = git@github.com:pingod/frpc.git

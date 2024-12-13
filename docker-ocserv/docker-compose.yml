@@ -1,0 +1,15 @@
+version: '3.0'
+services:
+  ocserv:
+    image: pezhvak/ocserv:latest
+    restart: always
+    container_name: ocserv
+    privileged: true
+    hostname: <domain>
+    ports:
+      - 1342:443/udp
+      - 1342:443
+    volumes:
+      - "./data:/etc/ocserv/data"
+      - ./certs/live/<domain>/fullchain.pem:/etc/ocserv/server-cert.pem
+      - ./certs/live/<domain>/privkey.pem:/etc/ocserv/server-key.pem

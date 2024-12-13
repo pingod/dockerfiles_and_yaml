@@ -1,0 +1,14 @@
+version: "3"
+services:
+  gost:
+    image: ginuerzh/gost:2.11.2
+    restart: always
+    network_mode: "host"
+    command:
+      #51802为wg的端口
+      - "-L=relay+tls://:11236/127.0.0.1:51820"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+

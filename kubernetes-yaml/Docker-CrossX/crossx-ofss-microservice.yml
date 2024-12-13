@@ -1,0 +1,439 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ofss-config-squid
+  namespace: kube-system
+data:
+  squid.conf: |-
+    auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/password
+    auth_param basic realm proxy
+    acl authenticated proxy_auth REQUIRED
+
+    acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
+    acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
+    acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
+    acl localnet src fc00::/7       # RFC 4193 local private network range
+    acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
+
+    acl SSL_ports port 443
+    acl Safe_ports port 80          # http
+    acl Safe_ports port 21          # ftp
+    acl Safe_ports port 443         # https
+    acl Safe_ports port 70          # gopher
+    acl Safe_ports port 210         # wais
+    acl Safe_ports port 1025-65535  # unregistered ports
+    acl Safe_ports port 280         # http-mgmt
+    acl Safe_ports port 488         # gss-http
+    acl Safe_ports port 591         # filemaker
+    acl Safe_ports port 777         # multiling http
+    acl CONNECT method CONNECT
+
+    acl dce-k8s  dst  10.25.10.21/32
+    acl dcs-frontend-k8s  dst  10.25.10.12/32
+    acl dcs-backend-k8s  dst  10.25.10.11/32
+    acl domain-dao  dstdomain  .daocloud.io
+
+    acl work-time time MTWHFAS 8:30-23:30
+
+    #http_access deny  !work-time
+
+    #注意此处必须是'!',否则用户登录后,后面的限制都将无效
+    http_access allow !authenticated
+
+
+    http_access allow  dce-k8s
+    http_access allow  dcs-frontend-k8s
+    http_access allow  dcs-backend-k8s
+    http_access allow  domain-dao
+
+    #squid我是放在反向代理后面的,所有请求都是来自同局域网的,所以这里就注释吧
+    #http_access allow localhost manager
+    #http_access allow localnet
+    #http_access allow localhost
+
+
+    # 下面是deny部分
+    #http_access deny manager
+    http_access deny !Safe_ports
+    http_access deny CONNECT !SSL_ports
+
+    #http_access deny to_localhost
+
+    #最后一行必须是deny all
+    http_access deny all
+
+    # Squid normally listens to port 3128
+    http_port 3128
+
+    # Squid normally listens to port 4128 for ssl bump
+    http_port 4128 ssl-bump generate-host-certificates=on dynamic_cert_mem_cache_size=4MB cert=/etc/squid-cert/private.pem key=/etc/squid-cert/private.pem
+    ssl_bump server-first all
+    always_direct allow all
+
+    # Uncomment and adjust the following to add a disk cache directory.
+    cache_dir ufs /var/cache/squid 100 16 256
+
+    # Leave coredumps in the first cache dir
+    coredump_dir /var/cache/squid
+
+    #
+    # Add any of your own refresh_pattern entries above these.
+    #
+    refresh_pattern ^ftp:   1440  20% 10080
+    refresh_pattern ^gopher:  1440  0%  1440
+    refresh_pattern -i (/cgi-bin/|\?) 0 0%  0
+    refresh_pattern .   30  20% 4320 reload-into-ims
+
+    range_offset_limit 200 MB
+    maximum_object_size 200 MB
+    quick_abort_min -1
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ofss-config-env
+  namespace: kube-system
+data:
+  hostname_in_docker: ts-qf-eks-useast1-dev01
+  ip_out_docker: 10.2.19.250
+  server_addr: x.x.x.x
+  ssh_port_out_docker: '22'
+#下面是easyrsa生成证书所需要的变量,保持默认即可(下面变量已经写到容器启动脚本中,为了保证变量存在所以在这里也定义了一次)
+  OPENVPN: /etc/openvpn
+  EASYRSA_PKI: '/etc/openvpn/pki'
+  EASYRSA_VARS_FILE: '/etc/openvpn/vars'
+  EASYRSA: /usr/share/easy-rsa
+  EASYRSA_CRL_DAYS: '3650'
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ofss-config-frpc
+  namespace: kube-system
+data:
+  frpc-lite.ini: |-
+    [common]
+    server_addr = x.x.x.x
+    server_port = 7100
+    log_file = console
+    log_level = info
+    log_max_days = 3
+    token = 405521
+
+    admin_addr = 127.0.0.1
+    admin_port = 7400
+    admin_user = admin
+    admin_pwd = admin
+
+    pool_count = 5
+    tcp_mux = true
+    #user = your_name
+    login_fail_exit = true
+    protocol = tcp
+
+    [range:sshindocker hostname_in_docker]
+    type = tcp
+    local_ip = 127.0.0.1
+    local_port = 22
+    remote_port = 1444
+    use_encryption = true
+    use_compression = true
+
+    [range:sshoutdocker hostname_in_docker]
+    type = tcp
+    local_ip = ip_out_docker
+    local_port = ssh_port_out_docker
+    remote_port = 0
+    use_encryption = false
+    use_compression = false
+
+
+    [range:tovn hostname_in_docker]
+    type = tcp
+    local_ip = open
+    local_port = 1194
+    remote_port = 0
+    use_encryption = true
+    use_compression = false
+
+    [range:uovn hostname_in_docker]
+    type = udp
+    local_ip = open
+    local_port = 1194
+    remote_port = 0
+    use_encryption = true
+    use_compression = false
+
+    [range:squid hostname_in_docker]
+    type = tcp
+    local_ip = squid
+    local_port = 3128
+    remote_port = 1448
+    use_encryption = true
+    use_compression = true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frpc
+spec:
+  selector:
+    matchLabels:
+      app: frpc
+  template:
+    metadata:
+      labels:
+        app: frpc
+    # spec:
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: kubernetes.io/hostname
+      #           operator: In
+      #           values:
+      #           - k8s-master1
+      #           - k8s-master2
+      #           - k8s-master3
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: ofss-config-env
+        image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/frpc:alpine-v1.0
+        imagePullPolicy: Always
+        name: frpc
+        resources:
+          limits:
+            cpu: 200m
+            memory: "209715200"
+          requests:
+            cpu: "0"
+            memory: "209715200"
+        volumeMounts:
+        - mountPath: /etc/frp-backup/
+          name: configmap-ofss-config-frpc
+        - mountPath: /etc/frp
+          name: hostpath-frp
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      volumes:
+      - name: configmap-ofss-config-frpc
+        configMap:
+          defaultMode: 420
+          name: ofss-config-frpc
+      - name: hostpath-frp
+        hostPath:
+          path: /data/tools/frp
+          type: ''
+      nodeSelector:
+        kubernetes.io/hostname: k8s-master1
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open
+spec:
+  selector:
+    matchLabels:
+      app: open
+  template:
+    metadata:
+      labels:
+        app: open
+    spec:
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: ofss-config-env
+        image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/openvpn:alpine-v1.0
+        imagePullPolicy: Always
+        name: open
+        resources:
+          limits:
+            cpu: 200m
+            memory: "209715200"
+          requests:
+            cpu: "0"
+            memory: "209715200"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/openvpn
+          name: hostpath-open
+      dnsPolicy: ClusterFirst
+      volumes:
+      - hostPath:
+          path: /data/tools/openvpn/
+          type: ""
+        name: hostpath-open
+      nodeSelector:
+        kubernetes.io/hostname: k8s-master1
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: squid
+spec:
+  selector:
+    matchLabels:
+      app: squid
+  template:
+    metadata:
+      labels:
+        app: squid
+    spec:
+      tolerations:
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
+      containers:
+      - image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/squid:alpine-v0.2
+        imagePullPolicy: Always
+        name: squid
+        resources:
+          limits:
+            cpu: 200m
+            memory: "209715200"
+          requests:
+            cpu: "0"
+            memory: "209715200"
+        volumeMounts:
+          - name: configmap-ofss-config-squid
+            mountPath: /etc/squid/squid.conf
+            subPath: squid.conf
+          - name: hostpath-squid-password
+            mountPath: /etc/squid/password
+      volumes:
+        - name: configmap-ofss-config-squid
+          configMap:
+            name: ofss-config-squid
+            items:
+              - key: squid.conf
+                path: squid.conf
+            defaultMode: 420
+        - name: hostpath-squid-password
+          hostPath:
+            path: /data/tools/squid/password
+            type: FileOrCreate
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: nps
+# spec:
+#   selector:
+#     matchLabels:
+#       app: nps
+#   template:
+#     metadata:
+#       labels:
+#         app: nps
+#     spec:
+#       tolerations:
+#        - key: node-role.kubernetes.io/master
+#          operator: Exists
+#          effect: NoSchedule
+#       containers:
+#       - env:
+#         - name: NPC_SERVER_ADDR
+#           value: 123.57.3.122:8024
+#         - name: NPC_SERVER_VKEY
+#           value: f5r2g0vpgoqjfx7u
+#         image: registry.cn-hangzhou.aliyuncs.com/sourcegarden/nps:client-v1.0
+#         imagePullPolicy: Always
+#         name: nps
+#         resources:
+#           limits:
+#             cpu: 200m
+#             memory: "209715200"
+#           requests:
+#             cpu: "0"
+#             memory: "209715200"
+#       dnsPolicy: ClusterFirst
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: frpc
+#   name: frpc
+# spec:
+#   ports:
+#   - name: frpc-1194
+#     port: 1194
+#     protocol: TCP
+#     targetPort: 1194
+#   selector:
+#     app: frpc
+#   sessionAffinity: None
+#   type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: open
+#   name: open
+# spec:
+#   ports:
+#   - name: open-1194
+#     port: 1194
+#     protocol: TCP
+#     targetPort: 1194
+#   selector:
+#     app: open
+#   type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: squid
+#   name: squid
+# spec:
+#   ports:
+#   - name: squid-3128
+#     port: 3128
+#     protocol: TCP
+#     targetPort: 3128
+#   - name: squid-4128
+#     port: 4128
+#     protocol: TCP
+#     targetPort: 4128
+#   selector:
+#     app: squid
+#   type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app-service: nps
+#   name: nps
+# spec:
+#   ports:
+#   - name: nps-9100
+#     port: 9100
+#     protocol: TCP
+#     targetPort: 9100
+#   selector:
+#     app: nps
+#   type: ClusterIP

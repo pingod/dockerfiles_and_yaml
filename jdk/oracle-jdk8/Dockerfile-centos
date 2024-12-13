@@ -1,0 +1,11 @@
+FROM centos:7
+
+WORKDIR /usr/local/
+
+ADD jdk-8u201-linux-x64.tar.gz /usr/local/
+
+ENV JAVA_HOME=/usr/local/jdk1.8.0_333
+ENV CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+CMD ["java","-version"]
